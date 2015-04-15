@@ -1,0 +1,48 @@
+{
+  "kind": "ReplicationController",
+  "apiVersion": "v1beta3",
+  "metadata": {
+    "name": "jenkins-leader",
+    "labels": {
+      "name": "jenkins", "role": "leader"
+    }
+  },
+  "spec": {
+    "replicas": 1,
+    "selector": {
+      "name": "jenkins", "role": "leader"
+    },
+    "template": {
+      "metadata": {
+        "name": "jenkins-leader",
+        "labels": {
+          "name": "jenkins", "role": "leader"
+        }
+      },
+      "spec": {
+        "containers": [
+            {
+              "name": "jenkins",
+              "image": "gcr.io/evanbrown-jenkins/jenkins-gcp-leader:latest",
+             "env": [
+                {
+                  "name": "GCS_RESTORE_URL",
+                  "value": "DISABLED"
+                }
+             ],
+             "ports": [
+               {
+                 "name": "jenkins-http",
+                 "containerPort": 8080
+               },
+               {
+                 "name": "jenkins-discovery",
+                 "containerPort": 50000
+               }
+             ]
+           }
+        ]
+      }
+    }
+  }
+}
