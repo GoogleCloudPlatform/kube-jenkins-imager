@@ -21,6 +21,5 @@ gcloud alpha container kubectl delete -f service_ssl_proxy.json
 gcloud alpha container clusters delete --quiet ${CLUSTER_NAME}
 
 # Delete firewall rules
-gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-swarm-discovery
-gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-http-cluster 
+gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-swarm-internal
 gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-web-public 

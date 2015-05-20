@@ -15,20 +15,20 @@
 CLUSTER_NAME=imager
 NUM_NODES=1
 MACHINE_TYPE=g1-small
-API_VERSION=0.15.0
+ZONE=us-central1-a
+API_VERSION=0.17.0
 
 # Create cluster
 gcloud alpha container clusters create ${CLUSTER_NAME} \
   --num-nodes ${NUM_NODES} \
   --machine-type ${MACHINE_TYPE} \
   --cluster-api-version ${API_VERSION} \
-  --scopes "https://www.googleapis.com/auth/devstorage.full_control" \
-           "https://www.googleapis.com/auth/projecthosting"
-gcloud config set container/cluster ${CLUSTER_NAME}
+  --scopes "https://www.googleapis.com/auth/devstorage.full_control,https://www.googleapis.com/auth/projecthosting" \
+  --zone ${ZONE}
 
 # Allow privileged pods
 gcloud compute ssh k8s-${CLUSTER_NAME}-master \
-  --command "sudo sed -i -- 's/--allow_privileged=False/--allow_privileged=true/g' /etc/default/kube-apiserver; sudo /etc/init.d/kube-apiserver restart"
+  --command "sudo sed -i -- 's/--allow_privileged=False/--allow_privileged=true/g' /etc/kubernetes/manifests/kube-apiserver.manifest; sudo docker ps | grep /kube-apiserver | cut -d ' ' -f 1 | xargs sudo docker kill"
 
 # Enable allow_privileged on nodes
 gcloud compute instances list \
@@ -38,18 +38,19 @@ gcloud compute instances list \
   | xargs -L 1 -I '{}' gcloud compute ssh {} --command "sudo sed -i -- 's/--allow_privileged=False/--allow_privileged=true/g' /etc/default/kubelet; sudo /etc/init.d/kubelet restart"
 
 # Allow kubernetes nodes to communicate between eachother on TCP 50000 and 8080
-gcloud compute firewall-rules create ${CLUSTER_NAME}-jenkins-swarm-internal --allow TCP:50000 TCP:8080 --source-tags k8s-${CLUSTER_NAME}-node --target-tags k8s-${CLUSTER_NAME}-node
+gcloud compute firewall-rules create ${CLUSTER_NAME}-jenkins-swarm-internal --allow TCP:50000,TCP:8080 --source-tags k8s-${CLUSTER_NAME}-node --target-tags k8s-${CLUSTER_NAME}-node
 
 # Allow public access to TCP 80 and 443
-gcloud compute firewall-rules create ${CLUSTER_NAME}-jenkins-web-public --allow TCP:80 TCP:443 --source-ranges 0.0.0.0/0 --target-tags k8s-${CLUSTER_NAME}-node
+gcloud compute firewall-rules create ${CLUSTER_NAME}-jenkins-web-public --allow TCP:80,TCP:443 --source-ranges 0.0.0.0/0 --target-tags k8s-${CLUSTER_NAME}-node
 
 # Deploy secrets, replication controllers, and services
-gcloud alpha container kubectl create -f ssl_secrets.json 
-gcloud alpha container kubectl create -f service_ssl_proxy.json
-gcloud alpha container kubectl create -f service_jenkins.json
-gcloud alpha container kubectl create -f ssl_proxy.json
-gcloud alpha container kubectl create -f leader.json 
-gcloud alpha container kubectl create -f agent.json
+kubectl config use-context gke_$(gcloud config list | grep project | cut -f 3 -d' ')_${ZONE}_${CLUSTER_NAME}
+kubectl create -f ssl_secrets.json 
+kubectl create -f service_ssl_proxy.json
+kubectl create -f service_jenkins.json
+kubectl create -f ssl_proxy.json
+kubectl create -f leader.json 
+kubectl create -f agent.json
 
 # Output FW addr
 echo "Jenkins will be available at http://$(gcloud compute forwarding-rules list --regexp "k8s-${CLUSTER_NAME}-default-nginx-ssl-proxy" | tail -n +2 | cut -f3 -d' ') shortly..."
