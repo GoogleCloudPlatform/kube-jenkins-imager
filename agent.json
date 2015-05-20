@@ -23,7 +23,7 @@
         "containers": [
           {
             "name": "jenkins-slave",
-            "image": "gcr.io/evanbrown-jenkins/jenkins-packer-agent:latest",
+            "image": "gcr.io/cloud-solutions-images/jenkins-packer-agent:latest",
             "command": [
               "sh",
               "-c",

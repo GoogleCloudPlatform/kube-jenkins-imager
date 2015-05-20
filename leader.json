@@ -23,7 +23,7 @@
         "containers": [
             {
               "name": "jenkins",
-              "image": "gcr.io/evanbrown-jenkins/jenkins-gcp-leader:latest",
+              "image": "gcr.io/cloud-solutions-images/jenkins-gcp-leader:latest",
              "env": [
                 {
                   "name": "GCS_RESTORE_URL",
