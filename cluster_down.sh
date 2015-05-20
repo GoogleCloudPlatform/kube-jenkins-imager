@@ -14,8 +14,8 @@
 CLUSTER_NAME=imager
 
 # Delete services
-gcloud alpha container kubectl delete -f service_jenkins.json
-gcloud alpha container kubectl delete -f service_ssl_proxy.json
+kubectl delete -f service_jenkins.json
+kubectl delete -f service_ssl_proxy.json
 
 # Delete cluster
 gcloud alpha container clusters delete --quiet ${CLUSTER_NAME}
