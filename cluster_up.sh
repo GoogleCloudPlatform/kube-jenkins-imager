@@ -16,7 +16,7 @@ CLUSTER_NAME=imager
 NUM_NODES=1
 MACHINE_TYPE=g1-small
 ZONE=us-central1-a
-API_VERSION=0.17.0
+API_VERSION=0.16.0
 
 # Create cluster
 gcloud alpha container clusters create ${CLUSTER_NAME} \
