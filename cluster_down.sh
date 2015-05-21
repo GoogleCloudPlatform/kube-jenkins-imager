@@ -14,12 +14,12 @@
 CLUSTER_NAME=imager
 
 # Delete services
-kubectl delete -f service_jenkins.json
-kubectl delete -f service_ssl_proxy.json
+kubectl delete -f service_jenkins.json >/dev/null
+kubectl delete -f service_ssl_proxy.json >/dev/null
 
 # Delete cluster
-gcloud alpha container clusters delete --quiet ${CLUSTER_NAME}
+gcloud alpha container clusters delete --quiet ${CLUSTER_NAME} >/dev/null
 
 # Delete firewall rules
-gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-swarm-internal
-gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-web-public 
+gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-swarm-internal >/dev/null
+gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-web-public >/dev/null 
