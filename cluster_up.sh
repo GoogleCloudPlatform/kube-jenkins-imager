@@ -75,4 +75,4 @@ kubectl create -f leader.json >/dev/null || error_exit "Error deploying leader.j
 kubectl create -f agent.json >/dev/null || error_exit "Error deploying agent.json"
 echo "done."
 
-echo "All resources deployed. Jenkins will be available in a few minutes at http://$(kubectl describe service/nginx-ssl-proxy 2>/dev/null | grep 'Public\ IPs' | cut -f3)"
+echo "All resources deployed. Run 'echo http://\$(kubectl describe service/nginx-ssl-proxy 2>/dev/null | grep 'Public\ IPs' | cut -f3)' to find your server's address, then give it a few minutes before trying to connect."
