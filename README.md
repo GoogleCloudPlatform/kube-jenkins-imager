@@ -1,7 +1,5 @@
 # Automated Image Builder with Jenkins, Packer, and Kubernetes
-In this tutorial you will deploy a fully-functional implementation of the automated image building pipeline described in the [Automated Image Builds with Jenkins, Packer, and Kubernetes solution paper](http://cloud.google.com/solutions).
-
-> TODO: Add final URL
+In this tutorial you will deploy a fully-functional implementation of the automated image building pipeline described in the [Automated Image Builds with Jenkins, Packer, and Kubernetes solution paper](https://cloud.google.com/solutions/automated-build-images-with-jenkins-kubernetes).
 
 You will use [Google Container Engine](https://cloud.google.com/container-engine/) and [Kubernetes](http://kubernetes.io) to deploy the environment. It will resemble this digram when you're done
 
@@ -36,21 +34,21 @@ Before you deploy the sample you'll need to make sure a few things are in order:
 
 1. Authenticate to gcloud:
 
-  ```shell
-  $ gcloud auth login
-  ```
+    ```shell
+    $ gcloud auth login
+    ```
 
 1. Set your project:
 
-  ```shell
-  $ gcloud config set project YOUR_PROJECT_ID
-  ```
+    ```shell
+    $ gcloud config set project YOUR_PROJECT_ID
+    ```
 
 1. Enable `alpha` features:
 
-  ```shell
-  $ gcloud components update alpha
-  ```
+    ```shell
+    $ gcloud components update alpha
+    ```
 
 1. If you are using Windows to complete the tutorial, install [Cygwin](http://cygwin.com/) and execute the steps in a terminal.
 
@@ -60,68 +58,113 @@ These quick deploy instructions are easiest way to get started. The work to crea
 
 To quick deploy the image builder application:
 
-1. Clone this repository or download and unzip a [copy from Releases](https://github.com/GoogleCloudPlatform/TODO/releases).
+1. Clone this repository or download and unzip a [copy from releases](https://github.com/GoogleCloudPlatform/kube-jenkins-imager/releases).
 
 1. Navigate to the directory:
  
-  ```shell
-  $ cd TODO
-  ```
+    ```shell
+    $ cd kube-jenkins-imager 
+    ```
 
 1. Copy `ssl_secrets.template.json` to `ssl_secrets.json`. The latter is included in `.gitignore` to prevent committing secret information to Git:
 
-  ```shell
-  $ cp ssl_secrets.template.json ssl_secrets.json
-  ```
+    ```shell
+    $ cp ssl_secrets.template.json ssl_secrets.json
+    ```
+<a name="ssl-setup"></a>
+ 1. **Optional, but very strongly encouraged:** You can configure SSL termination to encrypt the connection between your browser and Jenkins. For a production configuration, consider this step mandatory. To configure SSL:
 
-1. **Optional:** To use SSL at the Nginx proxy, base64-encode both your certificate and key file, then paste the output of each into the correct location in `ssl_secrets.json`:
+
+     * base64-encode both your certificate and key file:
   
-  ```shell
-  $ base64 -i STAR_yourdomain_com.crt
-    LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS...
-  ```
+        ```shell
+        $ base64 -i STAR_yourdomain_com.crt
+          LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS...
+        ```
 
-  ```shell
-  $ base64 -i STAR_yourdomain_com.key
-    LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS...
-  ```
+        ```shell
+        $ base64 -i STAR_yourdomain_com.key
+          LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS...
+        ```
 
-  Then modify modify `ssl_proxy.json` and change the `ENABLE_SSL` value to `true`:
+    1. Paste the output of each into the correct location in `ssl_secrets.json`:
 
-  ```shell
-  ...
-  { 
-    "name": "ENABLE_SSL",
-    "value": "true"
-  },
-  ...
-  ```
+        ```javascript
+        "data": {
+          ...
+          "proxycert": "YOUR_BASE64_ENCIDED_CERT",
+          "proxykey": "YOUR_BASE64_ENCIDED_CERT"",
+          ...
+        }
+        ```
 
-1. **Optional:** To customize the basic access authentication credentials used to access the Jenkins UI, use `htpasswd` piped through `base64` to create a new credential, then paste the output into the correct location in `ssl_secrets.json`: 
+    1. Generate a DHE Parameter to ensure a secure SSL setup;
+
+        ```shell
+        $ openssl dhparam -out dhparam.pem 2048
+        ```
+
+    1. base64 encode it:
+
+        ```shell
+        $ base64 -i dhparam.pem
+        ```
+
+    1.  Add the encoded value to `ssl_secrets.json`. A complete `ssl_secrets.json` would resemble:
+
+        ```javascript
+         {
+          "apiVersion": "v1beta3",
+          "kind": "Secret",
+          "metadata": {
+            "name": "ssl-proxy-secret",
+            "namespace": "default"
+          },
+          "data": {
+            "htpasswd": "amVua2luczokYXByMSRDaW9MaWhUOSRzZEh3dGRDLlFaRjdPUTRzQ1BoaEgwCg==",
+            "proxycert": "LS0tLS1CRUdJTiBDRVJU...",
+            "proxykey": "LS0tLS1CRUdJTiBDRVJU...",
+            "dhparam": "LS0tLS1CRUdJTiBESCBQQVJBTUVU..."
+          }
+        } 
+        ```
+
+    1. Finally, modify modify `ssl_proxy.json` and change the `ENABLE_SSL` value to `true`:
+
+        ```shell
+        ...
+        { 
+          "name": "ENABLE_SSL",
+          "value": "true"
+        },
+        ...
+        ```
+
+1. **Optional, but strongly encouraged:** To customize the basic access authentication credentials used to access the Jenkins UI, use `htpasswd` piped through `base64` to create a new credential, then paste the output into the correct location in `ssl_secrets.json`: 
   
-  ```shell       
-  $ htpasswd -nb USERNAME PASSWORD | base64
-  ```
-    
-  Alternatively, you can base64-encode an existing `.htpasswd` file and add it to `ssl_secrets.json` 
+    ```shell       
+    $ htpasswd -nb USERNAME PASSWORD | base64
+    ```
+      
+    Alternatively, you can base64-encode an existing `.htpasswd` file and add it to `ssl_secrets.json` 
 
 1. From a terminal in the directory you cloned or unzipped, run:
 
-  ```shell
-  $ ./cluster_up.sh
-  ```
+    ```shell
+    $ ./cluster_up.sh
+    ```
 
-   The script will take several minutes to complete. The abbreviated output should look similar to:
+     The script will take several minutes to complete. The abbreviated output should look similar to:
 
-  ```shell
-  Creating cluster imager...done.
-  ...
-  ...
-  <TRUNCATED>
-  ...
-  ...
-  Jenkins will be available at http://104.197.35.131 shortly... 
-  ```
+      ```shell
+      Creating cluster imager...done.
+      ...
+      ...
+      <TRUNCATED>
+      ...
+      ...
+      Jenkins will be available at http://104.197.35.131 shortly... 
+      ```
 1. Continue to the [Access Jenkins](#access-jenkins) section (sskip the Stepwise Deploy section)
 
 <a name="stepwise-deploy"></a>  
@@ -132,9 +175,9 @@ If you followed the Quick Deploy instructions, you don't need to follow these in
 
 1. Navigate to the directory:
  
-  ```shell
-  $ cd TODO
-  ```
+    ```shell
+    $ cd kube-jenkins-imager
+    ```
 
 1. Copy `ssl_secrets.template.json` to `ssl_secrets.json`. The latter is included in `.gitignore` to prevent committing secret information to Git:
 
@@ -142,7 +185,7 @@ If you followed the Quick Deploy instructions, you don't need to follow these in
   $ cp ssl_secrets.template.json ssl_secrets.json
   ```
 
-1. **Optional:** To use SSL at the Nginx proxy, base64-encode both your certificate and key file, then paste the output of each into the correct location in `ssl_secrets.json`:
+1. **Optional, but very strongly encouraged:** To use SSL, follow the [SSL setup instructionsi](#ssl-setup) in the Quick Deploy section.
   
   ```shell
   $ base64 -i STAR_yourdomain_com.crt
