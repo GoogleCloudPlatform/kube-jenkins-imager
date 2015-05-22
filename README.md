@@ -72,7 +72,7 @@ To quick deploy the image builder application:
     $ cp ssl_secrets.template.json ssl_secrets.json
     ```
 <a name="ssl-setup"></a>
- 1. **Optional, but very strongly encouraged:** You can configure SSL termination to encrypt the connection between your browser and Jenkins. For a production configuration, consider this step mandatory. To configure SSL:
+1. **Optional, but very strongly encouraged:** You can configure SSL termination to encrypt the connection between your browser and Jenkins. For a production configuration, consider this step mandatory. To configure SSL:
 
 
      * base64-encode both your certificate and key file:
@@ -87,7 +87,7 @@ To quick deploy the image builder application:
           LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS...
         ```
 
-    1. Paste the output of each into the correct location in `ssl_secrets.json`:
+    * Paste the output of each into the correct location in `ssl_secrets.json`:
 
         ```javascript
         "data": {
@@ -98,19 +98,19 @@ To quick deploy the image builder application:
         }
         ```
 
-    1. Generate a DHE Parameter to ensure a secure SSL setup;
+    * Generate a DHE Parameter to ensure a secure SSL setup;
 
         ```shell
         $ openssl dhparam -out dhparam.pem 2048
         ```
 
-    1. base64 encode it:
+    * base64 encode it:
 
         ```shell
         $ base64 -i dhparam.pem
         ```
 
-    1.  Add the encoded value to `ssl_secrets.json`. A complete `ssl_secrets.json` would resemble:
+    *  Add the encoded value to `ssl_secrets.json`. A complete `ssl_secrets.json` would resemble:
 
         ```javascript
          {
@@ -129,7 +129,7 @@ To quick deploy the image builder application:
         } 
         ```
 
-    1. Finally, modify modify `ssl_proxy.json` and change the `ENABLE_SSL` value to `true`:
+    * Finally, modify modify `ssl_proxy.json` and change the `ENABLE_SSL` value to `true`:
 
         ```shell
         ...
