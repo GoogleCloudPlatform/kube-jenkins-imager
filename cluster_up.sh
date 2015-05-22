@@ -23,14 +23,12 @@ CLUSTER_NAME=imager
 NUM_NODES=1
 MACHINE_TYPE=g1-small
 ZONE=us-central1-a
-API_VERSION=0.17.0
 
 echo -n "* Creating Google Container Engine cluster..."
 # Create cluster
 gcloud alpha container clusters create ${CLUSTER_NAME} \
   --num-nodes ${NUM_NODES} \
   --machine-type ${MACHINE_TYPE} \
-  --cluster-api-version ${API_VERSION} \
   --scopes "https://www.googleapis.com/auth/devstorage.full_control,https://www.googleapis.com/auth/projecthosting" \
   --zone ${ZONE} &>/dev/null || error_exit "Error creating Google Container Engine cluster"
 echo "done."

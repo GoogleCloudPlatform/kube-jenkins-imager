@@ -58,7 +58,7 @@ These quick deploy instructions are easiest way to get started. The work to crea
 
 To quick deploy the image builder application:
 
-1. Clone this repository or download and unzip a [copy from releases](https://github.com/GoogleCloudPlatform/kube-jenkins-imager/releases).
+1. Clone this repository (`$ git clone https://github.com/GoogleCloudPlatform/kube-jenkins-imager.git`) or download and unzip a [copy from releases](https://github.com/GoogleCloudPlatform/kube-jenkins-imager/releases).
 
 1. Navigate to the directory:
  
