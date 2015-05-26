@@ -218,19 +218,23 @@ In the following sections you will clone an existing repo (from the previous [Sc
 
 1. In the [Google Developer Console](https://console.developers.google.com/), navigate to **Source Code > Browse**, click "Get started" then choose "Push code from a local Git repository to your Cloud Repository", and follow all of the instructions to push the `scalable-resilient-web-app` to your Cloud Repository.
 
-1. Click the **Browse** menu item again, confirm your files are there, then click the gear icon:
+1. Click the **Browse** menu item again and confirm your files are there
 
-    ![](img/browse-repo.png)
+1. After you've pushed your files to the Cloud Repository, find and copy its Fetch URL for use in the next section:
 
-1. Click the settings icon, and copy your repository's URL. You'll need it in the next step:
+    ```shell
+    $ git remote -v show -n google | grep Fetch
+      Fetch URL: https://source.developers.google.com/p/your-new-project/
+    ```
 
-    ![](img/repo-url.png)
+    **Note:** The URL should be your project ID appended to the string `https://source.developers.google.com/p/`
+
 
 #### Create Jenkins Job
 1. Access Jenkins in your browser. If you don't remember the URL, you can run the following command in the terminal where you created the deployment to find it:
 
     ```shell
-    $ echo "http://$(gcloud compute forwarding-rules list --regexp "k8s-imager-default-nginx-ssl-proxy" | tail -n +2 | cut -f3 -d' ')"
+    $ echo http://$(kubectl describe service/nginx-ssl-proxy 2>/dev/null | grep 'Public\ IPs' | cut -f3)
     ```
 
 1. From the Jenkins main page, choose **New Item*, name the item `redmine-immutable-image`, choose **Freestyle project**, then click **OK**. It is important the name does not include spaces:
@@ -241,7 +245,7 @@ In the following sections you will clone an existing repo (from the previous [Sc
 
     ![](img/jenkins-label.png)
 
-1. Under **Source Code Management**, choose Git, paste your Cloud Repository URL from the previous section, and choose the credential you created earlier from the dropdown:
+1. Under **Source Code Management**, choose Git, paste your Cloud Repository URL (`https://source.developers.google.com/p/your-project-id`) from the previous section, and choose the credential you created earlier from the dropdown:
 
     ![](img/jenkins-scm.png)
 
@@ -316,6 +320,7 @@ In this section you will configure Jenkins to backup your job configurations and
     $ gsutil mb gs://jenkins-backups-$RANDOM-$(date +%s)
     Creating gs://jenkins-backups-21885-1430974383/...
     ```
+
 1. From the Jenkins main page, click the **jenkins-gcs-backup** job, then choose the **Configure** menu item.
 
 1. **Optional:** Adjust the build schedule to fit your needs.
@@ -397,19 +402,19 @@ Now that you have a Jenkins backup, you can use Kubernetes and Google Container 
 1. Create the new Replication Controller.
 
     ```shell
-    $ gcloud alpha container kubectl create -f leader-restore.json
+    $ kubectl create -f leader-restore.json
     ```
 
 1. Resize the old leader Replication Controller to 0.
   
     ```shell
-    $ gcloud alpha container kubectl resize --replicas=0 replicationcontroller jenkins-leader
+    $ kubectl resize --replicas=0 replicationcontroller jenkins-leader
     ```
 
 1. Delete the old Replication Controller and rename the new file:
 
     ```shell
-    $ gcloud alpha container kubectl delete -f leader.json
+    $ kubectl delete -f leader.json
     $ mv leader-restore.json leader.json
     ```
 
