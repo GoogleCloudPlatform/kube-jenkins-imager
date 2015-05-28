@@ -23,7 +23,10 @@
         "containers": [
           {
             "name": "nginx-ssl-proxy",
-            "image": "gcr.io/cloud-solutions-images/nginx-ssl-proxy:latest",
+            "image": "gcr.io/cloud-solutions-images/nginx-ssl-proxy:master-5cab243",
+            "command": [
+                "/bin/bash", "/usr/bin/start.sh"
+            ],
             "env": [
                 { 
                     "name": "SERVICE_HOST_ENV_NAME",

@@ -22,8 +22,11 @@
       "spec": {
         "containers": [
             {
-              "name": "jenkins",
-              "image": "gcr.io/cloud-solutions-images/jenkins-gcp-leader:latest",
+             "name": "jenkins",
+             "image": "gcr.io/cloud-solutions-images/jenkins-gcp-leader:master-1f6138a",
+             "command": [
+                "/usr/local/bin/start.sh"
+             ],
              "env": [
                 {
                   "name": "GCS_RESTORE_URL",

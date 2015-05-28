@@ -22,8 +22,8 @@
       "spec": {
         "containers": [
           {
-            "name": "jenkins-slave",
-            "image": "gcr.io/cloud-solutions-images/jenkins-packer-agent:latest",
+            "name": "jenkins-agent",
+            "image": "gcr.io/cloud-solutions-images/jenkins-packer-agent:master-cea002f",
             "command": [
               "sh",
               "-c",
