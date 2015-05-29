@@ -19,12 +19,13 @@ function error_exit
     exit 1
 }
 
-CLUSTER_NAME=imager
+# Check for cluster name as first (and only) arg
+CLUSTER_NAME=${1-imager}
 NUM_NODES=1
 MACHINE_TYPE=g1-small
 ZONE=us-central1-a
 
-echo -n "* Creating Google Container Engine cluster..."
+echo -n "* Creating Google Container Engine cluster \"${CLUSTER_NAME}\"..."
 # Create cluster
 gcloud alpha container clusters create ${CLUSTER_NAME} \
   --num-nodes ${NUM_NODES} \

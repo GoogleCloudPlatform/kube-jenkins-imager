@@ -11,7 +11,7 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-CLUSTER_NAME=imager
+CLUSTER_NAME=${1-imager}
 
 # Delete services
 kubectl delete -f service_jenkins.json >/dev/null
