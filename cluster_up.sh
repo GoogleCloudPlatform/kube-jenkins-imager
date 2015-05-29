@@ -31,7 +31,7 @@ gcloud alpha container clusters create ${CLUSTER_NAME} \
   --num-nodes ${NUM_NODES} \
   --machine-type ${MACHINE_TYPE} \
   --scopes "https://www.googleapis.com/auth/devstorage.full_control,https://www.googleapis.com/auth/projecthosting" \
-  --zone ${ZONE} &>/dev/null || error_exit "Error creating Google Container Engine cluster"
+  --zone ${ZONE} >/dev/null || error_exit "Error creating Google Container Engine cluster"
 echo "done."
 
 echo -n "* Enabling privileged pods in cluster master..."
