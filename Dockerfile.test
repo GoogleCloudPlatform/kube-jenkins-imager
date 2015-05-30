@@ -18,6 +18,7 @@ FROM google/cloud-sdk
 
 MAINTAINER Evan Brown <evanbrown@google.com>
 
+RUN gcloud components update alpha --quiet
 COPY . /tmp/kube-jenkins-imager
 WORKDIR /tmp/kube-jenkins-imager
 

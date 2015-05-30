@@ -12,13 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 CLUSTER_NAME=${1-imager}
+ZONE=us-central1-a
 
 # Delete services
 kubectl delete -f service_jenkins.json >/dev/null
 kubectl delete -f service_ssl_proxy.json >/dev/null
 
 # Delete cluster
-gcloud alpha container clusters delete --quiet ${CLUSTER_NAME} >/dev/null
+gcloud alpha container clusters delete --quiet ${CLUSTER_NAME} --zone ${ZONE} >/dev/null
 
 # Delete firewall rules
 gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-swarm-internal >/dev/null

@@ -25,6 +25,10 @@ NUM_NODES=1
 MACHINE_TYPE=g1-small
 ZONE=us-central1-a
 
+echo -n "* Generating a temporary SSH key pair..."
+ssh-keygen -f ~/.ssh/google_compute_engine -t rsa -N '' || error_exit "Error creating key pair"
+echo "done."
+
 echo -n "* Creating Google Container Engine cluster \"${CLUSTER_NAME}\"..."
 # Create cluster
 gcloud alpha container clusters create ${CLUSTER_NAME} \
@@ -37,6 +41,7 @@ echo "done."
 echo -n "* Enabling privileged pods in cluster master..."
 # Allow privileged pods
 gcloud compute ssh k8s-${CLUSTER_NAME}-master \
+  --zone ${ZONE} \
   --command "sudo sed -i -- 's/--allow_privileged=False/--allow_privileged=true/g' /etc/kubernetes/manifests/kube-apiserver.manifest; sudo docker ps | grep /kube-apiserver | cut -d ' ' -f 1 | xargs sudo docker kill" &>/dev/null || error_exit "Error enabling privileged pods in cluster master"
 echo "done."
 
@@ -46,7 +51,11 @@ gcloud compute instances list \
   -r "^k8s-${CLUSTER_NAME}-node-[0-9]+$" \
   | tail -n +2 \
   | cut -f1 -d' ' \
-  | xargs -L 1 -I '{}' gcloud --user-output-enabled=false compute ssh {} --command "sudo sed -i -- 's/--allow_privileged=False/--allow_privileged=true/g' /etc/default/kubelet; sudo /etc/init.d/kubelet restart" &>/dev/null || error_exit "Error enabling privileged pods in cluster nodes"
+  | xargs -L 1 -I '{}' gcloud --user-output-enabled=false compute ssh {} --zone ${ZONE} --command "sudo sed -i -- 's/--allow_privileged=False/--allow_privileged=true/g' /etc/default/kubelet; sudo /etc/init.d/kubelet restart" &>/dev/null || error_exit "Error enabling privileged pods in cluster nodes"
+echo "done."
+
+echo -n "* Deleting temporary SSH key pair..."
+rm ~/.ssh/google_compute_engine*
 echo "done."
 
 echo -n "* Creating firewall rules..."
