@@ -23,7 +23,7 @@
         "containers": [
             {
              "name": "jenkins",
-             "image": "gcr.io/cloud-solutions-images/jenkins-gcp-leader:master-1f6138a",
+             "image": "gcr.io/cloud-solutions-images/jenkins-gcp-leader:latest",
              "command": [
                 "/usr/local/bin/start.sh"
              ],

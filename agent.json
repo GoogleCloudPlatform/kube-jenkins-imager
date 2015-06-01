@@ -23,7 +23,7 @@
         "containers": [
           {
             "name": "jenkins-agent",
-            "image": "gcr.io/cloud-solutions-images/jenkins-packer-agent:master-cea002f",
+            "image": "gcr.io/cloud-solutions-images/jenkins-packer-agent:latest",
             "command": [
               "sh",
               "-c",
