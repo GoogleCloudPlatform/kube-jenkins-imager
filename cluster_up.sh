@@ -34,7 +34,7 @@ echo -n "* Creating Google Container Engine cluster \"${CLUSTER_NAME}\"..."
 gcloud alpha container clusters create ${CLUSTER_NAME} \
   --num-nodes ${NUM_NODES} \
   --machine-type ${MACHINE_TYPE} \
-  --scopes "https://www.googleapis.com/auth/devstorage.full_control,https://www.googleapis.com/auth/projecthosting" \
+  --scopes "https://www.googleapis.com/auth/devstorage.full_control,https://www.googleapis.com/auth/projecthosting,https://www.googleapis.com/auth/monitoring,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/compute,https://www.googleapis.com/auth/cloud-platform" \
   --zone ${ZONE} >/dev/null || error_exit "Error creating Google Container Engine cluster"
 echo "done."
 
@@ -48,7 +48,7 @@ echo "done."
 echo -n "* Enabling privileged pods in cluster nodes..."
 # Enable allow_privileged on nodes
 gcloud compute instances list \
-  -r "^k8s-${CLUSTER_NAME}-node-[0-9]+$" \
+  -r "^k8s-${CLUSTER_NAME}.*node.*$" \
   | tail -n +2 \
   | cut -f1 -d' ' \
   | xargs -L 1 -I '{}' gcloud --user-output-enabled=false compute ssh {} --zone ${ZONE} --command "sudo sed -i -- 's/--allow_privileged=False/--allow_privileged=true/g' /etc/default/kubelet; sudo /etc/init.d/kubelet restart" &>/dev/null || error_exit "Error enabling privileged pods in cluster nodes"
