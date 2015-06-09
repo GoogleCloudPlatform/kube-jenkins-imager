@@ -24,10 +24,15 @@ CLUSTER_NAME=${1-imager}
 NUM_NODES=1
 MACHINE_TYPE=g1-small
 ZONE=us-central1-a
+TEMPKEY=false
 
-echo -n "* Generating a temporary SSH key pair..."
-ssh-keygen -f ~/.ssh/google_compute_engine -t rsa -N '' || error_exit "Error creating key pair"
-echo "done."
+if [ -f "~/.ssh/google_compute_engine" ]
+then
+    TEMPKEY=true
+    echo -n "* Generating a temporary SSH key pair..."
+    ssh-keygen -f ~/.ssh/google_compute_engine -t rsa -N '' || error_exit "Error creating key pair"
+    echo "done."
+fi
 
 echo -n "* Creating Google Container Engine cluster \"${CLUSTER_NAME}\"..."
 # Create cluster
@@ -54,9 +59,12 @@ gcloud compute instances list \
   | xargs -L 1 -I '{}' gcloud --user-output-enabled=false compute ssh {} --zone ${ZONE} --command "sudo sed -i -- 's/--allow_privileged=False/--allow_privileged=true/g' /etc/default/kubelet; sudo /etc/init.d/kubelet restart" &>/dev/null || error_exit "Error enabling privileged pods in cluster nodes"
 echo "done."
 
-echo -n "* Deleting temporary SSH key pair..."
-rm ~/.ssh/google_compute_engine*
-echo "done."
+if [ "$TEMPKEY" = "true" ]
+then
+  echo -n "* Deleting temporary SSH key pair..."
+  rm ~/.ssh/google_compute_engine*
+  echo "done."
+fi
 
 echo -n "* Creating firewall rules..."
 # Allow kubernetes nodes to communicate between eachother on TCP 50000 and 8080
