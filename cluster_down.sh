@@ -18,9 +18,11 @@ ZONE=us-central1-a
 kubectl delete -f service_jenkins.json
 kubectl delete -f service_ssl_proxy.json
 
-# Delete cluster
-gcloud alpha container clusters delete --quiet ${CLUSTER_NAME} --zone ${ZONE}
-
 # Delete firewall rules
 gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-swarm-internal
 gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-web-public
+
+# Delete cluster
+gcloud alpha container clusters delete --quiet ${CLUSTER_NAME} --zone ${ZONE}
+
+
