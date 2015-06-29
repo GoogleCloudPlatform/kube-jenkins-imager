@@ -21,6 +21,7 @@ function error_exit
 
 # Check for cluster name as first (and only) arg
 CLUSTER_NAME=${1-imager}
+CLUSTER_API_VERSION=0.18.2
 NUM_NODES=1
 MACHINE_TYPE=g1-small
 ZONE=us-central1-a
@@ -37,6 +38,7 @@ fi
 echo -n "* Creating Google Container Engine cluster \"${CLUSTER_NAME}\"..."
 # Create cluster
 gcloud alpha container clusters create ${CLUSTER_NAME} \
+  --cluster-api-version ${CLUSTER_API_VERSION} \
   --num-nodes ${NUM_NODES} \
   --machine-type ${MACHINE_TYPE} \
   --scopes "https://www.googleapis.com/auth/devstorage.full_control,https://www.googleapis.com/auth/projecthosting,https://www.googleapis.com/auth/monitoring,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/compute,https://www.googleapis.com/auth/cloud-platform" \
@@ -91,4 +93,4 @@ kubectl create -f leader.json >/dev/null || error_exit "Error deploying leader.j
 kubectl create -f agent.json >/dev/null || error_exit "Error deploying agent.json"
 echo "done."
 
-echo "All resources deployed. Run 'echo http://\$(kubectl describe service/nginx-ssl-proxy 2>/dev/null | grep 'Public\ IPs' | cut -f3)' to find your server's address, then give it a few minutes before trying to connect."
+echo "All resources deployed. Run 'echo http://\$(kubectl describe service/nginx-ssl-proxy 2>/dev/null | grep 'LoadBalancer\ Ingress' | cut -f2)' to find your server's address, then give it a few minutes before trying to connect."
