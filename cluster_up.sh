@@ -85,12 +85,12 @@ for i in {1..5}; do kubectl get pods &>/dev/null && break || sleep 2; done
 
 # Deploy secrets, replication controllers, and services
 echo -n "* Deploying services, controllers, and secrets to Google Container Engine..."
-kubectl create -f ssl_secrets.json >/dev/null || error_exit "Error deploying ssl_secrets.json" 
-kubectl create -f service_ssl_proxy.json >/dev/null || error_exit "Error deploying service_ssl_proxy.json"
-kubectl create -f service_jenkins.json >/dev/null || error_exit "Error deploying service_jenkins.json"
-kubectl create -f ssl_proxy.json >/dev/null || error_exit "Error deploying ssl_proxy.json"
-kubectl create -f leader.json >/dev/null || error_exit "Error deploying leader.json"
-kubectl create -f agent.json >/dev/null || error_exit "Error deploying agent.json"
+kubectl create -f ssl_secrets.yaml >/dev/null || error_exit "Error deploying ssl_secrets.yaml" 
+kubectl create -f service_ssl_proxy.yaml >/dev/null || error_exit "Error deploying service_ssl_proxy.yaml"
+kubectl create -f service_jenkins.yaml >/dev/null || error_exit "Error deploying service_jenkins.yaml"
+kubectl create -f ssl_proxy.yaml >/dev/null || error_exit "Error deploying ssl_proxy.yaml"
+kubectl create -f leader.yaml >/dev/null || error_exit "Error deploying leader.yaml"
+kubectl create -f agent.yaml >/dev/null || error_exit "Error deploying agent.yaml"
 echo "done."
 
 echo "All resources deployed. Run 'echo http://\$(kubectl describe service/nginx-ssl-proxy 2>/dev/null | grep 'LoadBalancer\ Ingress' | cut -f2)' to find your server's address, then give it a few minutes before trying to connect."

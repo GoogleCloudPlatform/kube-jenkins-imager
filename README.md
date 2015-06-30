@@ -67,10 +67,10 @@ To quick deploy the image builder application:
     $ cd kube-jenkins-imager 
     ```
 
-1. Copy `ssl_secrets.template.json` to `ssl_secrets.json`. The latter is included in `.gitignore` to prevent committing secret information to Git:
+1. Copy `ssl_secrets.template.yaml` to `ssl_secrets.yaml`. The latter is included in `.gitignore` to prevent committing secret information to Git:
 
     ```shell
-    $ cp ssl_secrets.template.json ssl_secrets.json
+    $ cp ssl_secrets.template.yaml ssl_secrets.yaml
     ```
 <a name="ssl-setup"></a>
 1. **Optional, but very strongly encouraged:** You can configure SSL termination to encrypt the connection between your browser and Jenkins. For a production configuration, consider this step mandatory. To configure SSL:
@@ -88,15 +88,14 @@ To quick deploy the image builder application:
           LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS...
         ```
 
-    * Paste the output of each into the correct location in `ssl_secrets.json`:
-
-        ```javascript
-        "data": {
-          ...
-          "proxycert": "YOUR_BASE64_ENCIDED_CERT",
-          "proxykey": "YOUR_BASE64_ENCIDED_CERT"",
-          ...
-        }
+    * Paste the output of each into the correct location in `ssl_secrets.yaml`:
+        ```yaml
+        ---
+        #...
+        data:
+          proxycert: ''
+          proxykey: ''
+        #...
         ```
 
     * Generate a DHE Parameter to ensure a secure SSL setup;
@@ -111,43 +110,40 @@ To quick deploy the image builder application:
         $ base64 -i dhparam.pem
         ```
 
-    *  Add the encoded value to `ssl_secrets.json`. A complete `ssl_secrets.json` would resemble:
+    *  Add the encoded value to `ssl_secrets.yaml`. A complete `ssl_secrets.yaml` would resemble:
 
-        ```javascript
-         {
-          "apiVersion": "v1beta3",
-          "kind": "Secret",
-          "metadata": {
-            "name": "ssl-proxy-secret",
-            "namespace": "default"
-          },
-          "data": {
-            "htpasswd": "amVua2luczokYXByMSRDaW9MaWhUOSRzZEh3dGRDLlFaRjdPUTRzQ1BoaEgwCg==",
-            "proxycert": "LS0tLS1CRUdJTiBDRVJU...",
-            "proxykey": "LS0tLS1CRUdJTiBDRVJU...",
-            "dhparam": "LS0tLS1CRUdJTiBESCBQQVJBTUVU..."
-          }
-        } 
+        ```yaml
+        ---
+        apiVersion: v1beta3
+        kind: Secret
+        metadata:
+          name: ssl-proxy-secret
+          namespace: default
+        data:
+          htpasswd: amVua2luczokYXByMSRDaW9MaWhUOSRzZEh3dGRDLlFaRjdPUTRzQ1BoaEgwCg==
+          proxycert: 'LS0tLS1CRUdJTiBDRVJU...'
+          proxykey: 'LS0tLS1CRUdJTiBDRVJU...'
+          dhparam: 'LS0tLS1CRUdJTiBDRVJU...'
         ```
 
-    * Finally, modify modify `ssl_proxy.json` and change the `ENABLE_SSL` value to `true`:
+    * Finally, modify modify `ssl_proxy.yaml` and change the `ENABLE_SSL` value to `true`:
 
-        ```shell
-        ...
-        { 
-          "name": "ENABLE_SSL",
-          "value": "true"
-        },
-        ...
+        ```yaml
+        ---
+        #...
+        - name: ENABLE_SSL
+          value: 'true'
+        #... 
         ```
+
 <a name="customize-password"></a>
-1. **Optional, but very strongly encouraged:** To customize the basic access authentication credentials used to access the Jenkins UI, use `htpasswd` piped through `base64` to create a new credential, then paste the output into the correct location in `ssl_secrets.json`: 
+1. **Optional, but very strongly encouraged:** To customize the basic access authentication credentials used to access the Jenkins UI, use `htpasswd` piped through `base64` to create a new credential, then paste the output into the correct location in `ssl_secrets.yaml`: 
   
     ```shell       
     $ htpasswd -nb USERNAME PASSWORD | base64
     ```
       
-    Alternatively, you can base64-encode an existing `.htpasswd` file and add it to `ssl_secrets.json` 
+  Alternatively, you can base64-encode an existing `.htpasswd` file and add it to `ssl_secrets.yaml` 
 
 1. From a terminal in the directory you cloned or unzipped, run:
 
@@ -344,66 +340,53 @@ Now that you have a Jenkins backup, you can use Kubernetes and Google Container 
 1. Create a new Replication Controller file for the leader and open it in your favorite text editor:
 
     ```shell
-    $ cp leader.json leader-restore.json
-    $ vim leader-restore.json
+    $ cp leader.yaml leader-restore.yaml
+    $ vim leader-restore.yaml
     ``` 
-1. Add an environment variable to the pod spec pointing to the backup and rename the controller (look for the two `MODIFY THIS` tokens in the code below to see what you need to change in your file):
+1. Add an environment variable to the pod spec pointing to the backup and rename the controller (look for the two `# MODIFY` tokens in the code below to see what you need to change in your file):
 
-    ```shell
-    {
-      "kind": "ReplicationController",
-      "apiVersion": "v1beta3",
-      "metadata": {
-        "name": "jenkins-leader-restored",  <--- MODIFY THIS
-        "labels": {
-          "name": "jenkins", "role": "leader"
-        }
-      },
-      "spec": {
-        "replicas": 1,
-        "selector": {
-          "name": "jenkins", "role": "leader"
-        },
-        "template": {
-          "metadata": {
-            "name": "jenkins-leader",
-            "labels": {
-              "name": "jenkins", "role": "leader"
-            }
-          },
-          "spec": {
-            "containers": [
-                {
-                  "name": "jenkins",
-                  "image": "gcr.io/evanbrown-jenkins/jenkins-gcp-leader:latest",
-                 "env": [
-                    { 
-                        "name": "GCS_RESTORE_URL",
-    MODIFY THIS ---->   "value": "gs://jenkins-backups-21885-1430974383/jenkins-backups/LATEST.tar.gz"
-                    }
-                 ],
-                 "ports": [
-                   {
-                     "name": "jenkins-http",
-                     "containerPort": 8080
-                   },
-                   {
-                     "name": "jenkins-discovery",
-                     "containerPort": 50000
-                   }
-                 ]
-               }
-            ]
-          }
-        }
-      }
-    }  
-    ```
+    ```yaml
+    ---
+    kind: ReplicationController
+    apiVersion: v1beta3
+    metadata:
+      # MODIFY NAME
+      name: jenkins-leader-restored
+      labels:
+        name: jenkins
+        role: leader
+    spec:
+      replicas: 1
+      selector:
+        name: jenkins
+        role: leader
+      template:
+        metadata:
+          name: jenkins-leader
+          labels:
+            name: jenkins
+            role: leader
+        spec:
+          containers:
+          - name: jenkins
+            image: gcr.io/cloud-solutions-images/jenkins-gcp-leader:latest
+            command:
+            - /usr/local/bin/start.sh
+            env:
+            - name: GCS_RESTORE_URL
+              # MODIFY VALUE
+              value: gs://jenkins-backups-21885-1430974383/jenkins-backups/LATEST.tar.gz
+            ports:
+            - name: jenkins-http
+              containerPort: 8080
+            - name: jenkins-discovery
+              containerPort: 50000
+    ``` 
 
 1. Create the new Replication Controller.
 
     ```shell
-    $ kubectl create -f leader-restore.json
+    $ kubectl create -f leader-restore.yaml
     ```
 
 1. Resize the old leader Replication Controller to 0.
@@ -415,8 +398,8 @@ Now that you have a Jenkins backup, you can use Kubernetes and Google Container 
 1. Delete the old Replication Controller and rename the new file:
 
     ```shell
-    $ kubectl delete -f leader.json
-    $ mv leader-restore.json leader.json
+    $ kubectl delete -f leader.yaml
+    $ mv leader-restore.yaml leader.yaml
     ```
 
 1. Refresh the Jenkins URL in your browser until the restored version is available. You should notice your jobs and job history restored

@@ -1,0 +1,33 @@
+---
+kind: ReplicationController
+apiVersion: v1beta3
+metadata:
+  name: jenkins-agent
+  labels:
+    name: jenkins
+    role: agent
+    labels: gcp-packer
+spec:
+  replicas: 1
+  selector:
+    name: jenkins
+    role: agent
+    labels: gcp-packer
+  template:
+    metadata:
+      name: jenkins-agent
+      labels:
+        name: jenkins
+        role: agent
+        labels: gcp-packer
+    spec:
+      containers:
+      - name: jenkins-agent
+        image: gcr.io/cloud-solutions-images/jenkins-packer-agent:latest
+        command:
+        - sh
+        - -c
+        - /usr/local/bin/jenkins-docker-supervisor.sh -master http://$JENKINS_SERVICE_HOST:$JENKINS_SERVICE_PORT_UI
+          -tunnel $JENKINS_SERVICE_HOST:$JENKINS_SERVICE_PORT_DISCOVERY -executors
+          1 -labels gcp-packer
+        privileged: true
