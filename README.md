@@ -30,7 +30,7 @@ Before you deploy the sample you'll need to make sure a few things are in order:
     * Google Compute Engine
     * Google Container Engine API 
     
-1. Install the Cloud SDK using [these instructions](https://cloud.google.com/sdk/).
+1. Install the Cloud SDK verssion `0.9.68` or greater using [these instructions](https://cloud.google.com/sdk/).
 
 1. Authenticate to gcloud:
 
@@ -42,12 +42,6 @@ Before you deploy the sample you'll need to make sure a few things are in order:
 
     ```shell
     $ gcloud config set project YOUR_PROJECT_ID
-    ```
-
-1. Enable `alpha` features:
-
-    ```shell
-    $ gcloud components update alpha
     ```
 
 1. If you are using Windows to complete the tutorial, install [Cygwin](http://cygwin.com/) and execute the steps in a terminal.
