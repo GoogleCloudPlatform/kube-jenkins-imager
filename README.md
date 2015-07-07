@@ -29,7 +29,6 @@ Before you deploy the sample you'll need to make sure a few things are in order:
 
     * Google Compute Engine
     * Google Container Engine API 
-    * Project Hosting API
     
 1. Install the Cloud SDK using [these instructions](https://cloud.google.com/sdk/).
 
