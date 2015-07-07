@@ -86,7 +86,6 @@ To quick deploy the image builder application:
         $ base64 -i STAR_yourdomain_com.key
           LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS...
         ```
-
     * Paste the output of each into the correct location in `ssl_secrets.yaml`:
         ```yaml
         ---
@@ -96,19 +95,16 @@ To quick deploy the image builder application:
           proxykey: ''
         #...
         ```
-
     * Generate a DHE Parameter to ensure a secure SSL setup;
 
         ```shell
         $ openssl dhparam -out dhparam.pem 2048
         ```
-
     * base64 encode it:
 
         ```shell
         $ base64 -i dhparam.pem
         ```
-
     *  Add the encoded value to `ssl_secrets.yaml`. A complete `ssl_secrets.yaml` would resemble:
 
         ```yaml
@@ -124,7 +120,6 @@ To quick deploy the image builder application:
           proxykey: 'LS0tLS1CRUdJTiBDRVJU...'
           dhparam: 'LS0tLS1CRUdJTiBDRVJU...'
         ```
-
     * Finally, modify modify `ssl_proxy.yaml` and change the `ENABLE_SSL` value to `true`:
 
         ```yaml
@@ -134,7 +129,6 @@ To quick deploy the image builder application:
           value: 'true'
         #... 
         ```
-
 <a name="customize-password"></a>
 1. **Optional, but very strongly encouraged:** To customize the basic access authentication credentials used to access the Jenkins UI, use `htpasswd` piped through `base64` to create a new credential, then paste the output into the correct location in `ssl_secrets.yaml`: 
   
@@ -270,7 +264,7 @@ In the following sections you will clone an existing repo (from the previous [Sc
       packer.json
 
     # Push image
-    gcloud preview docker push gcr.io/${PROJECT_ID}/redmine:${GIT_BRANCH#*/}-${GIT_COMMIT:0:7}
+    gcloud docker push gcr.io/${PROJECT_ID}/redmine:${GIT_BRANCH#*/}-${GIT_COMMIT:0:7}
 
     # Remove local image
     docker rmi gcr.io/${PROJECT_ID}/redmine:${GIT_BRANCH#*/}-${GIT_COMMIT:0:7}
