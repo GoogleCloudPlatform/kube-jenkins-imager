@@ -86,7 +86,9 @@ To quick deploy the image builder application:
         $ base64 -i STAR_yourdomain_com.key
           LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS...
         ```
+
     * Paste the output of each into the correct location in `ssl_secrets.yaml`:
+    
         ```yaml
         ---
         #...
@@ -95,16 +97,19 @@ To quick deploy the image builder application:
           proxykey: ''
         #...
         ```
+
     * Generate a DHE Parameter to ensure a secure SSL setup;
 
         ```shell
         $ openssl dhparam -out dhparam.pem 2048
         ```
+
     * base64 encode it:
 
         ```shell
         $ base64 -i dhparam.pem
         ```
+
     *  Add the encoded value to `ssl_secrets.yaml`. A complete `ssl_secrets.yaml` would resemble:
 
         ```yaml
