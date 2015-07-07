@@ -41,7 +41,7 @@ gcloud alpha container clusters create ${CLUSTER_NAME} \
   --cluster-api-version ${CLUSTER_API_VERSION} \
   --num-nodes ${NUM_NODES} \
   --machine-type ${MACHINE_TYPE} \
-  --scopes "https://www.googleapis.com/auth/devstorage.full_control,https://www.googleapis.com/auth/monitoring,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/compute,https://www.googleapis.com/auth/cloud-platform" \
+  --scopes "https://www.googleapis.com/auth/projecthosting,https://www.googleapis.com/auth/devstorage.full_control,https://www.googleapis.com/auth/monitoring,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/compute,https://www.googleapis.com/auth/cloud-platform" \
   --zone ${ZONE} >/dev/null || error_exit "Error creating Google Container Engine cluster"
 echo "done."
 
