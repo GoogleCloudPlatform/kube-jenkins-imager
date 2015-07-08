@@ -126,7 +126,7 @@ To quick deploy the image builder application:
           dhparam: 'LS0tLS1CRUdJTiBDRVJU...'
         ```
 
-    * Finally, modify modify `ssl_proxy.yaml` and change the `ENABLE_SSL` value to `true`:
+    * Finally, modify `ssl_proxy.yaml` and change the `ENABLE_SSL` value to `true`:
 
         ```yaml
         ---
