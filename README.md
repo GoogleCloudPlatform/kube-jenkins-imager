@@ -29,7 +29,6 @@ Before you deploy the sample you'll need to make sure a few things are in order:
 
     * Google Compute Engine
     * Google Container Engine API 
-    * Project Hosting API
     
 1. Install the Cloud SDK using [these instructions](https://cloud.google.com/sdk/).
 
@@ -95,6 +94,7 @@ To quick deploy the image builder application:
         ```
 
     * Paste the output of each into the correct location in `ssl_secrets.yaml`:
+    
         ```yaml
         ---
         #...
@@ -277,7 +277,7 @@ In the following sections you will clone an existing repo (from the previous [Sc
       packer.json
 
     # Push image
-    gcloud preview docker push gcr.io/${PROJECT_ID}/redmine:${GIT_BRANCH#*/}-${GIT_COMMIT:0:7}
+    gcloud docker push gcr.io/${PROJECT_ID}/redmine:${GIT_BRANCH#*/}-${GIT_COMMIT:0:7}
 
     # Remove local image
     docker rmi gcr.io/${PROJECT_ID}/redmine:${GIT_BRANCH#*/}-${GIT_COMMIT:0:7}

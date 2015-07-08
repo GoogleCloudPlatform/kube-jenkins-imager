@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: jenkins
-        image: gcr.io/cloud-solutions-images/jenkins-gcp-leader:latest
+        image: gcr.io/cloud-solutions-images/jenkins-gcp-leader:master-ea097ca
         command:
         - /usr/local/bin/start.sh
         env:
