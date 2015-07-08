@@ -51,6 +51,12 @@ Before you deploy the sample you'll need to make sure a few things are in order:
     $ gcloud components update alpha
     ```
 
+1. Enable `kubernetes` features:
+
+    ```shell
+    $ gcloud components update kubectl
+    ```
+
 1. If you are using Windows to complete the tutorial, install [Cygwin](http://cygwin.com/) and execute the steps in a terminal.
 
 <a name="quick-deploy"></a>
