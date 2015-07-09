@@ -44,6 +44,12 @@ Before you deploy the sample you'll need to make sure a few things are in order:
     $ gcloud config set project YOUR_PROJECT_ID
     ```
 
+1. Enable `kubernetes` features:
+
+    ```shell
+    $ gcloud components update kubectl
+    ```
+
 1. If you are using Windows to complete the tutorial, install [Cygwin](http://cygwin.com/) and execute the steps in a terminal.
 
 <a name="quick-deploy"></a>
@@ -119,7 +125,8 @@ To quick deploy the image builder application:
           proxykey: 'LS0tLS1CRUdJTiBDRVJU...'
           dhparam: 'LS0tLS1CRUdJTiBDRVJU...'
         ```
-    * Finally, modify modify `ssl_proxy.yaml` and change the `ENABLE_SSL` value to `true`:
+
+    * Finally, modify `ssl_proxy.yaml` and change the `ENABLE_SSL` value to `true`:
 
         ```yaml
         ---
@@ -128,6 +135,7 @@ To quick deploy the image builder application:
           value: 'true'
         #... 
         ```
+
 <a name="customize-password"></a>
 1. **Optional, but very strongly encouraged:** To customize the basic access authentication credentials used to access the Jenkins UI, use `htpasswd` piped through `base64` to create a new credential, then paste the output into the correct location in `ssl_secrets.yaml`: 
   
