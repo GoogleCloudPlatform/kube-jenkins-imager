@@ -1,6 +1,6 @@
 ---
 kind: ReplicationController
-apiVersion: v1beta3
+apiVersion: v1
 metadata:
   name: jenkins-agent
   labels:
@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: jenkins-agent
-        image: gcr.io/cloud-solutions-images/jenkins-packer-agent:master-ef67cae
+        image: gcr.io/cloud-solutions-images/jenkins-packer-agent:master-ad5d751
         command:
         - sh
         - -c
@@ -33,4 +33,25 @@ spec:
         env:
         - name: HOME
           value: /home/jenkins-agent
-        privileged: true
+        volumeMounts:
+          - mountPath: /var/lib/docker
+            name: docker-lib
+          - mountPath: /var/run/docker.sock
+            name: docker-sock
+          - mountPath: /usr/bin/docker
+            name: docker-bin
+          - mountPath: /tmp
+            name: docker-tmp
+      volumes:
+        - name: docker-lib
+          hostPath:
+            path: /var/lib/docker
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+        - name: docker-bin
+          hostPath:
+            path: /usr/bin/docker
+        - name: docker-tmp
+          hostPath:
+            path: /tmp

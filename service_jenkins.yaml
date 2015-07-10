@@ -1,6 +1,6 @@
 ---
 kind: Service
-apiVersion: v1beta3
+apiVersion: v1
 metadata:
   name: jenkins
   labels:
@@ -16,7 +16,6 @@ spec:
     port: 50000
     targetPort: jenkins-discovery
     protocol: TCP
-  createExternalLoadBalancer: false
   selector:
     name: jenkins
     role: leader
