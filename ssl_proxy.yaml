@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: nginx-ssl-proxy
-        image: gcr.io/cloud-solutions-images/nginx-ssl-proxy:master-5cab243
+        image: gcr.io/cloud-solutions-images/nginx-ssl-proxy:master-cc00da0
         command:
         - /bin/bash
         - /usr/bin/start.sh
