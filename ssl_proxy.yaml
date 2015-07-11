@@ -34,9 +34,9 @@ spec:
         - name: ENABLE_BASIC_AUTH
           value: 'true'
         ports:
-        - name: nginx-ssl-proxy-http
+        - name: ssl-proxy-http
           containerPort: 80
-        - name: nginx-ssl-proxy-https
+        - name: ssl-proxy-https
           containerPort: 443
         volumeMounts:
         - name: secrets
