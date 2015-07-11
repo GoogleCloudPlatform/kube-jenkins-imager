@@ -18,7 +18,7 @@ FROM google/cloud-sdk
 
 MAINTAINER Evan Brown <evanbrown@google.com>
 
-RUN gcloud components update alpha --quiet
+RUN  gcloud components update kubectl --quiet
 COPY . /tmp/kube-jenkins-imager
 RUN cp /tmp/kube-jenkins-imager/ssl_secrets.template.yaml /tmp/kube-jenkins-imager/ssl_secrets.yaml
 RUN cp /tmp/kube-jenkins-imager/test/e2e.sh /tmp/kube-jenkins-imager/e2e.sh
