@@ -23,6 +23,6 @@ gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-swarm-inter
 gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-web-public
 
 # Delete cluster
-gcloud alpha container clusters delete --quiet ${CLUSTER_NAME} --zone ${ZONE}
+gcloud beta container clusters delete --quiet ${CLUSTER_NAME} --zone ${ZONE}
 
 
