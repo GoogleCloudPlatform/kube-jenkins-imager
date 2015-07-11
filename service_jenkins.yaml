@@ -14,7 +14,7 @@ spec:
     protocol: TCP
   - name: discovery
     port: 50000
-    targetPort: jenkins-discovery
+    targetPort: jenkins-disco
     protocol: TCP
   selector:
     name: jenkins

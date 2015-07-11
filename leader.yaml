@@ -29,5 +29,5 @@ spec:
         ports:
         - name: jenkins-http
           containerPort: 8080
-        - name: jenkins-discovery
+        - name: jenkins-disco
           containerPort: 50000
