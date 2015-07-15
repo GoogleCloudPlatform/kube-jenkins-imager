@@ -12,5 +12,8 @@ do
   fi
 done
 
+echo "Using images:"
+cat images.cfg
+
 ./cluster_up.sh imagertest
 ./cluster_down.sh imagertest
