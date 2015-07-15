@@ -8,7 +8,7 @@ do
   # Substitute images if they're defined in the env
   if [ "${!i}" != "" ]
   then
-    sed -i "s@$i.*@$i=\"${!i}\"@g" images.cfg
+    sed -i "s@$i.*@$i=\"${!i}\"@" images.cfg
   fi
 done
 
