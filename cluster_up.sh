@@ -81,9 +81,9 @@ kubectl create -f service_ssl_proxy.yaml >/dev/null || error_exit "Error deployi
 kubectl create -f service_jenkins.yaml >/dev/null || error_exit "Error deploying service_jenkins.yaml"
 
 # Replace {{image}} tokens with image URls sourced from images.cfg
-cat ssl_proxy.yaml | sed "s@image:.*@image: $nginx@" | kubectl create -f - >/dev/null || error_exit "Error deploying ssl_proxy.yaml"
-cat leader.yaml | sed "s@image:.*@image: $leader@" | kubectl create -f - >/dev/null || error_exit "Error deploying leader.yaml"
-cat agent.yaml | sed "s@image:.*@image: $agent@" | kubectl create -f - >/dev/null || error_exit "Error deploying agent.yaml"
+cat ssl_proxy.yaml | sed "s@image:.*@image: $PROXY_IMAGE@" | kubectl create -f - >/dev/null || error_exit "Error deploying ssl_proxy.yaml"
+cat leader.yaml | sed "s@image:.*@image: $LEADER_IMAGE@" | kubectl create -f - >/dev/null || error_exit "Error deploying leader.yaml"
+cat agent.yaml | sed "s@image:.*@image: $PACKER_IMAGE@" | kubectl create -f - >/dev/null || error_exit "Error deploying agent.yaml"
 echo "done."
 
 echo "All resources deployed. Run 'echo http://\$(kubectl describe service/nginx-ssl-proxy 2>/dev/null | grep 'LoadBalancer\ Ingress' | cut -f2)' to find your server's address, then give it a few minutes before trying to connect."
