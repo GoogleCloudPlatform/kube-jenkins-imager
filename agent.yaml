@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: jenkins-agent
-        image: gcr.io/cloud-solutions-images/jenkins-packer-agent:master-6918831
+        image: {{agent}}
         command:
         - sh
         - -c

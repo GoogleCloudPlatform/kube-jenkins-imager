@@ -6,10 +6,7 @@
 # You may obtain a copy of the License at
 #
 #    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# # Unless required by applicable law or agreed to in writing, software # distributed under the License is distributed on an "AS IS" BASIS, # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 set -e
 
@@ -26,6 +23,10 @@ MACHINE_TYPE=g1-small
 ZONE=us-central1-a
 TEMPKEY=false
 
+# Source the config
+. images.cfg
+
+# Set up SSH for GCEt stat
 if [ -f "~/.ssh/google_compute_engine" ]
 then
     TEMPKEY=true
@@ -78,9 +79,11 @@ echo -n "* Deploying services, controllers, and secrets to Google Container Engi
 kubectl create -f ssl_secrets.yaml >/dev/null || error_exit "Error deploying ssl_secrets.yaml" 
 kubectl create -f service_ssl_proxy.yaml >/dev/null || error_exit "Error deploying service_ssl_proxy.yaml"
 kubectl create -f service_jenkins.yaml >/dev/null || error_exit "Error deploying service_jenkins.yaml"
-kubectl create -f ssl_proxy.yaml >/dev/null || error_exit "Error deploying ssl_proxy.yaml"
-kubectl create -f leader.yaml >/dev/null || error_exit "Error deploying leader.yaml"
-kubectl create -f agent.yaml >/dev/null || error_exit "Error deploying agent.yaml"
+
+# Replace {{image}} tokens with image URls sourced from images.cfg
+cat ssl_proxy.yaml | sed "s@image:.*@image: $nginx@" | kubectl create -f - >/dev/null || error_exit "Error deploying ssl_proxy.yaml"
+cat leader.yaml | sed "s@image:.*@image: $leader@" | kubectl create -f - >/dev/null || error_exit "Error deploying leader.yaml"
+cat agent.yaml | sed "s@image:.*@image: $agent@" | kubectl create -f - >/dev/null || error_exit "Error deploying agent.yaml"
 echo "done."
 
 echo "All resources deployed. Run 'echo http://\$(kubectl describe service/nginx-ssl-proxy 2>/dev/null | grep 'LoadBalancer\ Ingress' | cut -f2)' to find your server's address, then give it a few minutes before trying to connect."
