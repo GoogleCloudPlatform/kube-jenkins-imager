@@ -14,7 +14,7 @@ done
 
 echo "Using images:"
 cat images.cfg
-ts=$(date +%s)
+ts=$(date +%s%3N)
 ./cluster_up.sh it${ts}
 ./cluster_down.sh it${ts}
 
