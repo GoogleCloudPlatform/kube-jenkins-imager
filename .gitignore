@@ -4,3 +4,4 @@ ssl_secrets.yaml
 *.swp
 *.swo
 release/
+cluster.cfg
