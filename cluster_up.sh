@@ -37,7 +37,7 @@ fi
 
 echo -n "* Creating Google Container Engine cluster \"${CLUSTER_NAME}\"..."
 # Create cluster
-gcloud beta container clusters create ${CLUSTER_NAME} \
+gcloud container clusters create ${CLUSTER_NAME} \
   --num-nodes ${NUM_NODES} \
   --machine-type ${MACHINE_TYPE} \
   --scopes "https://www.googleapis.com/auth/projecthosting,https://www.googleapis.com/auth/devstorage.full_control,https://www.googleapis.com/auth/monitoring,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/compute,https://www.googleapis.com/auth/cloud-platform" \
