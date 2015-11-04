@@ -16,15 +16,9 @@ function error_exit
     exit 1
 }
 
-# Check for cluster name as first (and only) arg
-CLUSTER_NAME=${1-imager}
-NUM_NODES=1
-MACHINE_TYPE=g1-small
-ZONE=us-central1-a
-TEMPKEY=false
-
 # Source the config
 . images.cfg
+. cluster.cfg
 
 # Set up SSH for GCEt stat
 if [ -f "~/.ssh/google_compute_engine" ]
@@ -76,7 +70,7 @@ echo "done."
 
 # Deploy secrets, replication controllers, and services
 echo -n "* Deploying services, controllers, and secrets to Google Container Engine..."
-kubectl create -f ssl_secrets.yaml >/dev/null || error_exit "Error deploying ssl_secrets.yaml" 
+kubectl create -f ssl_secrets.yaml >/dev/null || error_exit "Error deploying ssl_secrets.yaml"
 kubectl create -f service_ssl_proxy.yaml >/dev/null || error_exit "Error deploying service_ssl_proxy.yaml"
 kubectl create -f service_jenkins.yaml >/dev/null || error_exit "Error deploying service_jenkins.yaml"
 

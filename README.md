@@ -22,14 +22,14 @@ $ echo "This is a sample command"
 ## Deploy
 ### Deployment Requirements
 Before you deploy the sample you'll need to make sure a few things are in order:
- 
+
 1. Create a new project in the [Google Developer Console](https://console.developers.google.com/project) and note the new project's ID.
 
 1. In the [APIs & Auth section of the Google Developers Console](https://console.developers.google.com/project/_/apiui/api) of your new project, enable the following APIs:
 
     * Google Compute Engine
-    * Google Container Engine API 
-    
+    * Google Container Engine API
+
 1. Install the Cloud SDK verssion `0.9.68` or greater using [these instructions](https://cloud.google.com/sdk/).
 
 1. Authenticate to gcloud:
@@ -61,22 +61,25 @@ To quick deploy the image builder application:
 1. Clone this repository (`$ git clone https://github.com/GoogleCloudPlatform/kube-jenkins-imager.git`) or download and unzip a [copy from releases](https://github.com/GoogleCloudPlatform/kube-jenkins-imager/releases).
 
 1. Navigate to the directory:
- 
+
     ```shell
-    $ cd kube-jenkins-imager 
+    $ cd kube-jenkins-imager
     ```
 
-1. Copy `ssl_secrets.template.yaml` to `ssl_secrets.yaml`. The latter is included in `.gitignore` to prevent committing secret information to Git:
+1. Run the prepare.sh script to copy `ssl_secrets.template.yaml` to `ssl_secrets.yaml` and `cluster.template.cfg` to `cluster.cfg`. These latters are included in `.gitignore` to prevent committing secret/preference information to Git:
 
     ```shell
-    $ cp ssl_secrets.template.yaml ssl_secrets.yaml
+    $ ./prepare.sh
     ```
 <a name="ssl-setup"></a>
+
+1. You can change configuration in the `cluster.cfg` file.
+
 1. **Optional, but very strongly encouraged:** You can configure SSL termination to encrypt the connection between your browser and Jenkins. For a production configuration, consider this step mandatory. To configure SSL:
 
 
      * base64-encode both your certificate and key file:
-  
+
         ```shell
         $ base64 -i STAR_yourdomain_com.crt
           LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS...
@@ -88,7 +91,7 @@ To quick deploy the image builder application:
         ```
 
     * Paste the output of each into the correct location in `ssl_secrets.yaml`:
-    
+
         ```yaml
         ---
         #...
@@ -133,17 +136,17 @@ To quick deploy the image builder application:
         #...
         - name: ENABLE_SSL
           value: 'true'
-        #... 
+        #...
         ```
 
 <a name="customize-password"></a>
-1. **Optional, but very strongly encouraged:** To customize the basic access authentication credentials used to access the Jenkins UI, use `htpasswd` piped through `base64` to create a new credential, then paste the output into the correct location in `ssl_secrets.yaml`: 
-  
-    ```shell       
+1. **Optional, but very strongly encouraged:** To customize the basic access authentication credentials used to access the Jenkins UI, use `htpasswd` piped through `base64` to create a new credential, then paste the output into the correct location in `ssl_secrets.yaml`:
+
+    ```shell
     $ htpasswd -nb USERNAME PASSWORD | base64
     ```
-      
-  Alternatively, you can base64-encode an existing `.htpasswd` file and add it to `ssl_secrets.yaml` 
+
+  Alternatively, you can base64-encode an existing `.htpasswd` file and add it to `ssl_secrets.yaml`
 
 1. From a terminal in the directory you cloned or unzipped, run:
 
@@ -160,7 +163,7 @@ To quick deploy the image builder application:
       <TRUNCATED>
       ...
       ...
-      Jenkins will be available at http://104.197.35.131 shortly... 
+      Jenkins will be available at http://104.197.35.131 shortly...
       ```
 1. Continue to the [Access Jenkins](#access-jenkins) section (skip the Stepwise Deploy section)
 
@@ -342,7 +345,7 @@ Now that you have a Jenkins backup, you can use Kubernetes and Google Container 
     ```shell
     $ cp leader.yaml leader-restore.yaml
     $ vim leader-restore.yaml
-    ``` 
+    ```
 1. Add an environment variable to the pod spec pointing to the backup and rename the controller (look for the two `# MODIFY` tokens in the code below to see what you need to change in your file):
 
     ```yaml
@@ -381,7 +384,7 @@ Now that you have a Jenkins backup, you can use Kubernetes and Google Container 
               containerPort: 8080
             - name: jenkins-discovery
               containerPort: 50000
-    ``` 
+    ```
 
 1. Create the new Replication Controller.
 
@@ -390,7 +393,7 @@ Now that you have a Jenkins backup, you can use Kubernetes and Google Container 
     ```
 
 1. Resize the old leader Replication Controller to 0.
-  
+
     ```shell
     $ kubectl resize --replicas=0 replicationcontroller jenkins-leader
     ```
