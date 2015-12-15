@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 CLUSTER_NAME=${1-imager}
-ZONE=us-central1-a
+ZONE=us-central1-f
 
 # Delete services
 kubectl delete -f service_jenkins.yaml
@@ -23,6 +23,6 @@ gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-swarm-inter
 gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-web-public
 
 # Delete cluster
-gcloud beta container clusters delete --quiet ${CLUSTER_NAME} --zone ${ZONE}
+gcloud container clusters delete --quiet ${CLUSTER_NAME} --zone ${ZONE}
 
 

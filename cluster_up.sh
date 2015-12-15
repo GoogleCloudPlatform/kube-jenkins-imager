@@ -18,9 +18,9 @@ function error_exit
 
 # Check for cluster name as first (and only) arg
 CLUSTER_NAME=${1-imager}
-NUM_NODES=1
-MACHINE_TYPE=g1-small
-ZONE=us-central1-a
+NUM_NODES=3
+MACHINE_TYPE=n1-standard-1
+ZONE=us-central1-f
 TEMPKEY=false
 
 # Source the config
