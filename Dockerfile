@@ -35,6 +35,3 @@ ENV PATH /google-cloud-sdk/bin:$PATH
 COPY . /tmp/kube-jenkins-imager
 RUN cp /tmp/kube-jenkins-imager/ssl_secrets.template.yaml /tmp/kube-jenkins-imager/ssl_secrets.yaml
 RUN cp /tmp/kube-jenkins-imager/test/e2e.sh /tmp/kube-jenkins-imager/e2e.sh
-WORKDIR /tmp/kube-jenkins-imager
-
-ENTRYPOINT ["./e2e.sh"]
