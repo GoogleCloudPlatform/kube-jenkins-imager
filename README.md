@@ -22,14 +22,14 @@ $ echo "This is a sample command"
 ## Deploy
 ### Deployment Requirements
 Before you deploy the sample you'll need to make sure a few things are in order:
- 
+
 1. Create a new project in the [Google Developer Console](https://console.developers.google.com/project) and note the new project's ID.
 
 1. In the [APIs & Auth section of the Google Developers Console](https://console.developers.google.com/project/_/apiui/api) of your new project, enable the following APIs:
 
     * Google Compute Engine
-    * Google Container Engine API 
-    
+    * Google Container Engine API
+
 1. Install the Cloud SDK verssion `0.9.68` or greater using [these instructions](https://cloud.google.com/sdk/).
 
 1. Authenticate to gcloud:
@@ -61,89 +61,10 @@ To quick deploy the image builder application:
 1. Clone this repository (`$ git clone https://github.com/GoogleCloudPlatform/kube-jenkins-imager.git`) or download and unzip a [copy from releases](https://github.com/GoogleCloudPlatform/kube-jenkins-imager/releases).
 
 1. Navigate to the directory:
- 
-    ```shell
-    $ cd kube-jenkins-imager 
-    ```
-
-1. Copy `ssl_secrets.template.yaml` to `ssl_secrets.yaml`. The latter is included in `.gitignore` to prevent committing secret information to Git:
 
     ```shell
-    $ cp ssl_secrets.template.yaml ssl_secrets.yaml
+    $ cd kube-jenkins-imager
     ```
-<a name="ssl-setup"></a>
-1. **Optional, but very strongly encouraged:** You can configure SSL termination to encrypt the connection between your browser and Jenkins. For a production configuration, consider this step mandatory. To configure SSL:
-
-
-     * base64-encode both your certificate and key file:
-  
-        ```shell
-        $ base64 -i STAR_yourdomain_com.crt
-          LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS...
-        ```
-
-        ```shell
-        $ base64 -i STAR_yourdomain_com.key
-          LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS...
-        ```
-
-    * Paste the output of each into the correct location in `ssl_secrets.yaml`:
-    
-        ```yaml
-        ---
-        #...
-        data:
-          proxycert: ''
-          proxykey: ''
-        #...
-        ```
-
-    * Generate a DHE Parameter to ensure a secure SSL setup;
-
-        ```shell
-        $ openssl dhparam -out dhparam.pem 2048
-        ```
-
-    * base64 encode it:
-
-        ```shell
-        $ base64 -i dhparam.pem
-        ```
-
-    *  Add the encoded value to `ssl_secrets.yaml`. A complete `ssl_secrets.yaml` would resemble:
-
-        ```yaml
-        ---
-        apiVersion: v1beta3
-        kind: Secret
-        metadata:
-          name: ssl-proxy-secret
-          namespace: default
-        data:
-          htpasswd: amVua2luczokYXByMSRDaW9MaWhUOSRzZEh3dGRDLlFaRjdPUTRzQ1BoaEgwCg==
-          proxycert: 'LS0tLS1CRUdJTiBDRVJU...'
-          proxykey: 'LS0tLS1CRUdJTiBDRVJU...'
-          dhparam: 'LS0tLS1CRUdJTiBDRVJU...'
-        ```
-
-    * Finally, modify `ssl_proxy.yaml` and change the `ENABLE_SSL` value to `true`:
-
-        ```yaml
-        ---
-        #...
-        - name: ENABLE_SSL
-          value: 'true'
-        #... 
-        ```
-
-<a name="customize-password"></a>
-1. **Optional, but very strongly encouraged:** To customize the basic access authentication credentials used to access the Jenkins UI, use `htpasswd` piped through `base64` to create a new credential, then paste the output into the correct location in `ssl_secrets.yaml`: 
-  
-    ```shell       
-    $ htpasswd -nb USERNAME PASSWORD | base64
-    ```
-      
-  Alternatively, you can base64-encode an existing `.htpasswd` file and add it to `ssl_secrets.yaml` 
 
 1. From a terminal in the directory you cloned or unzipped, run:
 
@@ -160,7 +81,7 @@ To quick deploy the image builder application:
       <TRUNCATED>
       ...
       ...
-      Jenkins will be available at http://104.197.35.131 shortly... 
+      All resources deployed.
       ```
 1. Continue to the [Access Jenkins](#access-jenkins) section (skip the Stepwise Deploy section)
 
@@ -170,19 +91,8 @@ You can find open the `cluster_up.sh` script and execute the commands from each 
 
 <a name="access-jenkins"></a>
 ## Access Jenkins
-1. Access the URL output when you created your deployment. You should be prompted to authenticate. Unless you disabled or customized your `.htpasswd`, the username and password is `jenkins`:
-
-    ![](img/auth.png)
-
-    > **Troubleshooting:** Keep in mind that it may take a few minutes to download the Docker images required to run the application, even though the load balancer is ready. It is possible that the Nginx reverse proxy is not ready, and your browser will display an output similar to:
-    >
-    > ![](img/unavailable.png)
-    >
-    > It is also possible that the Nginx reverse proxy is working, but Jenkins isn't ready yet. In that case, you'll receive an authentication prompt, but receive a **502 Bad Gateway** response from Nginx:
-    >
-    > ![](img/badgateway.png)
-    >
-    > In either case, give the cluster a few more minutes to finish downloading the initial Docker images and try again.
+1. Access the URL output when you created your deployment. Click the login button and use the username and password
+   that was output by the `cluster_up.sh` script:
 
 1. After a successful login you should see the Jenkins admin landing page with a default backup job:
 
@@ -231,7 +141,7 @@ In the following sections you will clone an existing repo (from the previous [Sc
 1. Access Jenkins in your browser. If you don't remember the URL, you can run the following command in the terminal where you created the deployment to find it:
 
     ```shell
-    $ echo http://$(kubectl describe service/nginx-ssl-proxy 2>/dev/null | grep 'Public\ IPs' | cut -f3)
+    $ echo http://$(kubectl get ingress jenkins --namespace jenkins -o "jsonpath={.status.loadBalancer.ingress[0].ip}")
     ```
 
 1. From the Jenkins main page, choose **New Item*, name the item `redmine-immutable-image`, choose **Freestyle project**, then click **OK**. It is important the name does not include spaces:
@@ -263,6 +173,9 @@ In the following sections you will clone an existing repo (from the previous [Sc
     # Get current project
     PROJECT_ID=$(curl -s 'http://metadata/computeMetadata/v1/project/project-id' -H 'Metadata-Flavor: Google')
 
+    # Install packer
+    curl -L https://releases.hashicorp.com/packer/0.8.6/packer_0.8.6_linux_amd64.zip -o /tmp/packer.zip; unzip /tmp/packer.zip -d /usr/local/bin
+
     # Do packer build
     packer build \
       -var "project_id=${PROJECT_ID}" \
@@ -270,11 +183,17 @@ In the following sections you will clone an existing repo (from the previous [Sc
       -var "git_branch=${GIT_BRANCH#*/}" \
       packer.json
 
+    # Create and push Docker version of the image
+    IMAGE_TAG=gcr.io/${PROJECT_ID}/redmine:${GIT_BRANCH#*/}-${GIT_COMMIT:0:7}
+
+    # Build image
+    docker build -t $IMAGE_TAG .
+
     # Push image
-    gcloud docker push gcr.io/${PROJECT_ID}/redmine:${GIT_BRANCH#*/}-${GIT_COMMIT:0:7}
+    gcloud docker push $IMAGE_TAG
 
     # Remove local image
-    docker rmi gcr.io/${PROJECT_ID}/redmine:${GIT_BRANCH#*/}-${GIT_COMMIT:0:7}
+    docker rmi $IMAGE_TAG
     ```
 
 1. Click Save to save your job:
@@ -342,7 +261,7 @@ Now that you have a Jenkins backup, you can use Kubernetes and Google Container 
     ```shell
     $ cp leader.yaml leader-restore.yaml
     $ vim leader-restore.yaml
-    ``` 
+    ```
 1. Add an environment variable to the pod spec pointing to the backup and rename the controller (look for the two `# MODIFY` tokens in the code below to see what you need to change in your file):
 
     ```yaml
@@ -381,7 +300,7 @@ Now that you have a Jenkins backup, you can use Kubernetes and Google Container 
               containerPort: 8080
             - name: jenkins-discovery
               containerPort: 50000
-    ``` 
+    ```
 
 1. Create the new Replication Controller.
 
@@ -390,7 +309,7 @@ Now that you have a Jenkins backup, you can use Kubernetes and Google Container 
     ```
 
 1. Resize the old leader Replication Controller to 0.
-  
+
     ```shell
     $ kubectl resize --replicas=0 replicationcontroller jenkins-leader
     ```
