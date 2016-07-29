@@ -14,15 +14,5 @@
 CLUSTER_NAME=${1-imager}
 ZONE=us-central1-f
 
-# Delete services
-kubectl delete -f service_jenkins.yaml
-kubectl delete -f service_ssl_proxy.yaml
-
-# Delete firewall rules
-gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-swarm-internal
-gcloud compute firewall-rules delete --quiet ${CLUSTER_NAME}-jenkins-web-public
-
 # Delete cluster
 gcloud container clusters delete --quiet ${CLUSTER_NAME} --zone ${ZONE}
-
-
