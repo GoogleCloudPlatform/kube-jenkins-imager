@@ -56,7 +56,7 @@ for bes in `gcloud compute backend-services list | grep $ig | cut -d\  -f1`; do
 done
 
 # Delete instance groups
-for cig in `gcloud compute instance-groups unmanaged list $ig | cut -d\  -f1`; do
+for cig in `gcloud compute instance-groups unmanaged list | grep $ig | cut -d\  -f1`; do
   gcloud compute instance-groups unmanaged delete $cig
 done
 
@@ -69,7 +69,7 @@ done
 gcloud compute disks delete jenkins-home
 
 # Delete image
-gcloud compute images delete jenkins-home-image
+# gcloud compute images delete jenkins-home-image
 
 # Delete network
 gcloud compute networks delete ${NETWORK_NAME}
