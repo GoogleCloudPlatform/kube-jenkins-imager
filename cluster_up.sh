@@ -20,6 +20,7 @@ function error_exit
 CLUSTER_NAME=${1-imager}
 NUM_NODES=3
 MACHINE_TYPE=n1-standard-1
+NETWORK=default
 ZONE=us-central1-f
 
 # Source the config
@@ -31,12 +32,14 @@ gcloud container clusters create ${CLUSTER_NAME} \
   --num-nodes ${NUM_NODES} \
   --machine-type ${MACHINE_TYPE} \
   --scopes "https://www.googleapis.com/auth/projecthosting,https://www.googleapis.com/auth/devstorage.full_control,https://www.googleapis.com/auth/monitoring,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/compute,https://www.googleapis.com/auth/cloud-platform" \
-  --zone ${ZONE} || error_exit "Error creating Google Container Engine cluster"
+  --zone ${ZONE} \
+  --network ${NETWORK} || error_exit "Error creating Google Container Engine cluster"
 echo "done."
 
 # Make kubectl use new clusterc
 echo "* Configuring kubectl to use ${CLUSTER_NAME} cluster..."
-gcloud container clusters get-credentials ${CLUSTER_NAME}
+gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${ZONE}
+
 echo "done."
 
 echo "Getting Jenkins artifacts"
