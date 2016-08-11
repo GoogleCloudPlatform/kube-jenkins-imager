@@ -39,7 +39,6 @@ echo "done."
 # Make kubectl use new clusterc
 echo "* Configuring kubectl to use ${CLUSTER_NAME} cluster..."
 gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${ZONE}
-
 echo "done."
 
 echo "Getting Jenkins artifacts"
