@@ -1,7 +1,7 @@
 # Automated Image Builder with Jenkins, Packer, and Kubernetes
 In this tutorial you will deploy a fully-functional implementation of the automated image building pipeline described in the [Automated Image Builds with Jenkins, Packer, and Kubernetes solution paper](https://cloud.google.com/solutions/automated-build-images-with-jenkins-kubernetes).
 
-You will use [Google Container Engine](https://cloud.google.com/container-engine/) and [Kubernetes](http://kubernetes.io) to deploy the environment. It will resemble this digram when you're done
+You will use [Google Container Engine](https://cloud.google.com/container-engine/) and [Kubernetes](http://kubernetes.io) to deploy the environment. It will resemble this diagram when you're done
 
 ![](img/overview.png)
 
@@ -85,7 +85,7 @@ To quick deploy the image builder application:
       ```
 1. Continue to the [Access Jenkins](#access-jenkins) section (skip the Stepwise Deploy section)
 
-<a name="stepwise-deploy"></a>  
+<a name="stepwise-deploy"></a>
 ### Stepwise Deploy
 You can find open the `cluster_up.sh` script and execute the commands from each line for a closer look at everything that's taking place.
 
