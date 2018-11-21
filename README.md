@@ -1,9 +1,7 @@
 # Automated Image Builder with Jenkins, Packer, and Kubernetes
 In this tutorial you will deploy a fully-functional implementation of the automated image building pipeline described in the [Automated Image Builds with Jenkins, Packer, and Kubernetes solution paper](https://cloud.google.com/solutions/automated-build-images-with-jenkins-kubernetes).
 
-You will use [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) and [Kubernetes](http://kubernetes.io) to deploy the environment. It will resemble this diagram when you're done
-
-![](img/overview.png)
+You will use [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) and [Kubernetes](http://kubernetes.io) to deploy the environment.
 
 <a name="very-important-things"></a>
 ## Very Important Things
@@ -193,102 +191,6 @@ In the following sections you will clone an existing repo (from the previous [Sc
 1. In the [Google Developers Console](https://console.developers.google.com) navigate to **Compute > Images** and confirm that your GCE image for Redmine is there:
 
     ![](img/view-image.png)
-
-### Configure Backup
-In this section you will configure Jenkins to backup your job configurations and history to Google Cloud Storage.
-
-1. Create a bucket to store the backups in. Copy the output of the command (sample output included below):
-
-    ```shell
-    $ gsutil mb gs://jenkins-backups-$RANDOM-$(date +%s)
-    Creating gs://jenkins-backups-21885-1430974383/...
-    ```
-
-1. From the Jenkins main page, click the **jenkins-gcs-backup** job, then choose the **Configure** menu item.
-
-1. **Optional:** Adjust the build schedule to fit your needs.
-
-1. In the Post-build Actions section, ensure your credential is selected, then edit the Storage Location field, replacing the `YOUR_GCS_BUCKET_NAME` string with the name of the bucket you created in the previous step. In the example output above, that would be `jenkins-backups-21885-1430974383`. Save your changes:
-
-    ![](img/jenkins-config-backup.png)
-
-1. Click the **Build Now** menu item to run the backup. It should completely quickly, usually in just a few seconds. The blue orb indicates a successful backup:
-
-    ![](img/jenkins-good-build.png)
-
-1. View the backup in the [Google Developers Console](https://console.developers.google.com) by choosing **Storage > Cloud Storage > Storage browser** in the left menu, then clicking your backup bucket in the list, and clicking into the `jenkins-backups` folder. You should see both the date-stamped and LATEST backups:
-
-    ![](img/jenkins-latest-backup.png)
-
-## Practice Restoring a Backup
-Now that you have a Jenkins backup, you can use Kubernetes and Google Kubernetes Engine to practice restoring the backup. Here's an overview of the process, with code you can execute to complete it.
-
-1. Create a new Replication Controller file for the leader and open it in your favorite text editor:
-
-    ```shell
-    $ cp leader.yaml leader-restore.yaml
-    $ vim leader-restore.yaml
-    ```
-1. Add an environment variable to the pod spec pointing to the backup and rename the controller (look for the two `# MODIFY` tokens in the code below to see what you need to change in your file):
-
-    ```yaml
-    ---
-    kind: ReplicationController
-    apiVersion: v1beta3
-    metadata:
-      # MODIFY NAME
-      name: jenkins-leader-restored
-      labels:
-        name: jenkins
-        role: leader
-    spec:
-      replicas: 1
-      selector:
-        name: jenkins
-        role: leader
-      template:
-        metadata:
-          name: jenkins-leader
-          labels:
-            name: jenkins
-            role: leader
-        spec:
-          containers:
-          - name: jenkins
-            image: gcr.io/cloud-solutions-images/jenkins-gcp-leader:latest
-            command:
-            - /usr/local/bin/start.sh
-            env:
-            - name: GCS_RESTORE_URL
-              # MODIFY VALUE
-              value: gs://jenkins-backups-21885-1430974383/jenkins-backups/LATEST.tar.gz
-            ports:
-            - name: jenkins-http
-              containerPort: 8080
-            - name: jenkins-discovery
-              containerPort: 50000
-    ```
-
-1. Create the new Replication Controller.
-
-    ```shell
-    $ kubectl create -f leader-restore.yaml
-    ```
-
-1. Resize the old leader Replication Controller to 0.
-
-    ```shell
-    $ kubectl resize --replicas=0 replicationcontroller jenkins-leader
-    ```
-
-1. Delete the old Replication Controller and rename the new file:
-
-    ```shell
-    $ kubectl delete -f leader.yaml
-    $ mv leader-restore.yaml leader.yaml
-    ```
-
-1. Refresh the Jenkins URL in your browser until the restored version is available. You should notice your jobs and job history restored
 
 <a name="delete-the-deployment"></a>
 ## Delete the Deployment
