@@ -151,51 +151,17 @@ In the following sections you will clone an existing repo (from the previous [Sc
     $ echo http://$(kubectl get service cd-jenkins -o "jsonpath={.status.loadBalancer.ingress[0].ip}")
     ```
 
-1. From the Jenkins main page, choose **New Item*, name the item `redmine-immutable-image`, choose **Freestyle project**, then click **OK**. It is important the name does not include spaces:
-
-    ![](img/job-config.png)
-
-1. Check **Restrict where this project can be run** and use `gcp-packer` as the label expression to ensure the job runs on the correct build agents:
-
-    ![](img/jenkins-label.png)
-
-1. Under **Source Code Management**, choose Git, paste your Cloud Repository URL (`https://source.developers.google.com/p/your-project-id`) from the previous section, and choose the credential you created earlier from the dropdown:
-
-    ![](img/jenkins-scm.png)
+1. From the Jenkins main page, choose **New Item*, name the item `redmine-immutable-image`, choose **Pipeline**, then click **OK**. It is important the name does not include spaces.
 
 1. Under **Build Triggers**, choose Poll SCM and enter a value for Schedule. In this example, `H/5 * * * *` will poll the repository every 5 minutes. Choose a value that you consider appropriate:
 
     ![](img/jenkins-trigger.png)
 
-1. Under **Build**, click the Add build step dropdown and select Execute shell:
+1. Under **Pipeline**, in the **Definition** dropdown choose **Pipeline script from SCM**.
 
-    ![](img/jenkins-build-shell.png)
+1. Paste your Cloud Repository URL (`https://source.developers.google.com/p/your-project-id`) from the previous section, and choose the credential you created earlier from the dropdown:
 
-1. Paste the following command. When it runs, it will retrieve the project ID your Jenkins installation is running in, execute Packer to build GCE and Docker images, then push the Docker image to Google Container Registry and finally remove the local copy of the Docker image:
-
-    ```shell
-    #!/bin/bash
-    set -e
-
-    # Get current project
-    PROJECT_ID=$(curl -s 'http://metadata/computeMetadata/v1/project/project-id' -H 'Metadata-Flavor: Google')
-
-    # Install packer
-    curl -L https://releases.hashicorp.com/packer/1.3.2/packer_1.3.2_linux_amd64.zip -o /tmp/packer.zip; unzip /tmp/packer.zip
-
-    # Do packer build
-    ./packer build \
-      -var "project_id=${PROJECT_ID}" \
-      -var "git_commit=${GIT_COMMIT:0:7}" \
-      -var "git_branch=${GIT_BRANCH#*/}" \
-      packer.json
-
-    # Create and push Docker version of the image
-    IMAGE_TAG=gcr.io/${PROJECT_ID}/redmine:${GIT_BRANCH#*/}-${GIT_COMMIT:0:7}
-
-    # Build image
-    gcloud build submit -t $IMAGE_TAG .
-    ```
+    ![](img/jenkins-scm.png)
 
 1. Click Save to save your job:
 
