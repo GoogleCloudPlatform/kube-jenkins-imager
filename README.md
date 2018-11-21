@@ -1,7 +1,7 @@
 # Automated Image Builder with Jenkins, Packer, and Kubernetes
 In this tutorial you will deploy a fully-functional implementation of the automated image building pipeline described in the [Automated Image Builds with Jenkins, Packer, and Kubernetes solution paper](https://cloud.google.com/solutions/automated-build-images-with-jenkins-kubernetes).
 
-You will use [Google Container Engine](https://cloud.google.com/container-engine/) and [Kubernetes](http://kubernetes.io) to deploy the environment. It will resemble this diagram when you're done
+You will use [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) and [Kubernetes](http://kubernetes.io) to deploy the environment. It will resemble this diagram when you're done
 
 ![](img/overview.png)
 
@@ -28,7 +28,8 @@ Before you deploy the sample you'll need to make sure a few things are in order:
 1. In the [APIs & Auth section of the Google Developers Console](https://console.developers.google.com/project/_/apiui/api) of your new project, enable the following APIs:
 
     * Google Compute Engine
-    * Google Container Engine API
+    * Google Kubernetes Engine API
+    * Cloud Build API
 
 1. Install the Cloud SDK verssion `0.9.68` or greater using [these instructions](https://cloud.google.com/sdk/).
 
@@ -54,7 +55,7 @@ Before you deploy the sample you'll need to make sure a few things are in order:
 
 <a name="quick-deploy"></a>
 ### Quick Deploy
-These quick deploy instructions are easiest way to get started. The work to create a Google Container Engine cluster and launch the necessary Kubernetes resources is captured in the `cluster_up.sh` script.
+These quick deploy instructions are easiest way to get started. The work to create a Google Kubernetes Engine cluster and launch the necessary Kubernetes resources is captured in the `cluster_up.sh` script.
 
 To quick deploy the image builder application:
 
@@ -94,7 +95,7 @@ You can find open the `cluster_up.sh` script and execute the commands from each 
 1. Access the URL output when you created your deployment. Click the login button and use the username and password
    that was output by the `cluster_up.sh` script:
 
-1. After a successful login you should see the Jenkins admin landing page with a default backup job:
+1. After a successful login you should see the Jenkins admin landing page:
 
     ![](img/jenkins.png)
 
@@ -123,11 +124,17 @@ In the following sections you will clone an existing repo (from the previous [Sc
     $ cd scalable-resilient-web-app
     ```
 
-1. In the [Google Developer Console](https://console.developers.google.com/), navigate to **Source Code > Browse**, click "Get started" then choose "Push code from a local Git repository to your Cloud Repository", and follow all of the instructions to push the `scalable-resilient-web-app` to your Cloud Repository.
+1. Create a Cloud Source Repository and push your code to it:
 
-1. Click the **Browse** menu item again and confirm your files are there
+    ```shell
+    $ gcloud source repos create scalable-resilient-web-app
+    $ git config --global credential.https://source.developers.google.com.helper gcloud.sh
+    $ export PROJECT=$(gcloud config get-value project)
+    $ git remote add google https://source.developers.google.com/p/${PROJECT}/r/scalable-resilient-web-app
+    $ git push --all google
+    ```
 
-1. After you've pushed your files to the Cloud Repository, find and copy its Fetch URL for use in the next section:
+1. After you've pushed your files to the Cloud Source Repository, find and copy its Fetch URL for use in the next section:
 
     ```shell
     $ git remote -v show -n google | grep Fetch
@@ -141,64 +148,24 @@ In the following sections you will clone an existing repo (from the previous [Sc
 1. Access Jenkins in your browser. If you don't remember the URL, you can run the following command in the terminal where you created the deployment to find it:
 
     ```shell
-    $ echo http://$(kubectl get ingress jenkins --namespace jenkins -o "jsonpath={.status.loadBalancer.ingress[0].ip}")
+    $ echo http://$(kubectl get service cd-jenkins -o "jsonpath={.status.loadBalancer.ingress[0].ip}")
     ```
 
-1. From the Jenkins main page, choose **New Item*, name the item `redmine-immutable-image`, choose **Freestyle project**, then click **OK**. It is important the name does not include spaces:
+1. From the Jenkins main page, choose **New Item*, name the item `redmine-immutable-image`, choose **Pipeline**, then click **OK**. It is important the name does not include spaces.
 
-    ![](img/job-config.png)
-
-1. Check **Restrict where this project can be run** and use `gcp-packer` as the label expression to ensure the job runs on the correct build agents:
-
-    ![](img/jenkins-label.png)
-
-1. Under **Source Code Management**, choose Git, paste your Cloud Repository URL (`https://source.developers.google.com/p/your-project-id`) from the previous section, and choose the credential you created earlier from the dropdown:
-
-    ![](img/jenkins-scm.png)
+    ![](img/jenkins-trigger.png)
 
 1. Under **Build Triggers**, choose Poll SCM and enter a value for Schedule. In this example, `H/5 * * * *` will poll the repository every 5 minutes. Choose a value that you consider appropriate:
 
     ![](img/jenkins-trigger.png)
 
-1. Under **Build**, click the Add build step dropdown and select Execute shell:
+1. Under **Pipeline**, in the **Definition** dropdown choose **Pipeline script from SCM**.
 
-    ![](img/jenkins-build-shell.png)
+1. Paste your Cloud Repository URL (`https://source.developers.google.com/p/your-project-id`) from the previous section, and choose the credential you created earlier from the dropdown:
 
-1. Paste the following command. When it runs, it will retrieve the project ID your Jenkins installation is running in, execute Packer to build GCE and Docker images, then push the Docker image to Google Container Registry and finally remove the local copy of the Docker image:
+    ![](img/jenkins-scm.png)
 
-    ```shell
-    #!/bin/bash
-    set -e
-
-    # Get current project
-    PROJECT_ID=$(curl -s 'http://metadata/computeMetadata/v1/project/project-id' -H 'Metadata-Flavor: Google')
-
-    # Install packer
-    curl -L https://releases.hashicorp.com/packer/0.8.6/packer_0.8.6_linux_amd64.zip -o /tmp/packer.zip; unzip /tmp/packer.zip -d /usr/local/bin
-
-    # Do packer build
-    packer build \
-      -var "project_id=${PROJECT_ID}" \
-      -var "git_commit=${GIT_COMMIT:0:7}" \
-      -var "git_branch=${GIT_BRANCH#*/}" \
-      packer.json
-
-    # Create and push Docker version of the image
-    IMAGE_TAG=gcr.io/${PROJECT_ID}/redmine:${GIT_BRANCH#*/}-${GIT_COMMIT:0:7}
-
-    # Build image
-    docker build -t $IMAGE_TAG .
-
-    # Push image
-    gcloud docker push $IMAGE_TAG
-
-    # Remove local image
-    docker rmi $IMAGE_TAG
-    ```
-
-1. Click Save to save your job:
-
-    ![](img/jenkins-save.png)
+1. Click Save to save your job.
 
 #### Run the Build
 1. After saving the project, choose the **Build Now** menu item, then click the job number when it appears:
@@ -209,7 +176,7 @@ In the following sections you will clone an existing repo (from the previous [Sc
 
     ![](img/jenkins-console-output.png)
 
-  Packer parallelizes the GCE and Docker builds. You can expect the build to take about 20 minutes; the sample build is updating the OS, building and installing Ruby, and installing the Redmine project management application and all of its gem dependencies.
+  Jenkins parallelizes the GCE and Docker builds. You can expect the build to take about 20 minutes; the sample build is updating the OS, building and installing Ruby, and installing the Redmine project management application and all of its gem dependencies.
 
 1. The build is done when you see a `Finished: SUCCESS` line in the output. A few lines before that you should see the outputs (GCE and Docker iamges) of the build:
 
@@ -254,7 +221,7 @@ In this section you will configure Jenkins to backup your job configurations and
     ![](img/jenkins-latest-backup.png)
 
 ## Practice Restoring a Backup
-Now that you have a Jenkins backup, you can use Kubernetes and Google Container Engine to practice restoring the backup. Here's an overview of the process, with code you can execute to complete it.
+Now that you have a Jenkins backup, you can use Kubernetes and Google Kubernetes Engine to practice restoring the backup. Here's an overview of the process, with code you can execute to complete it.
 
 1. Create a new Replication Controller file for the leader and open it in your favorite text editor:
 
