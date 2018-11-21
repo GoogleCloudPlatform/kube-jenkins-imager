@@ -1,7 +1,7 @@
 # Automated Image Builder with Jenkins, Packer, and Kubernetes
 In this tutorial you will deploy a fully-functional implementation of the automated image building pipeline described in the [Automated Image Builds with Jenkins, Packer, and Kubernetes solution paper](https://cloud.google.com/solutions/automated-build-images-with-jenkins-kubernetes).
 
-You will use [Google Container Engine](https://cloud.google.com/container-engine/) and [Kubernetes](http://kubernetes.io) to deploy the environment. It will resemble this diagram when you're done
+You will use [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) and [Kubernetes](http://kubernetes.io) to deploy the environment. It will resemble this diagram when you're done
 
 ![](img/overview.png)
 
@@ -28,7 +28,8 @@ Before you deploy the sample you'll need to make sure a few things are in order:
 1. In the [APIs & Auth section of the Google Developers Console](https://console.developers.google.com/project/_/apiui/api) of your new project, enable the following APIs:
 
     * Google Compute Engine
-    * Google Container Engine API
+    * Google Kubernetes Engine API
+    * Cloud Build API
 
 1. Install the Cloud SDK verssion `0.9.68` or greater using [these instructions](https://cloud.google.com/sdk/).
 
@@ -54,7 +55,7 @@ Before you deploy the sample you'll need to make sure a few things are in order:
 
 <a name="quick-deploy"></a>
 ### Quick Deploy
-These quick deploy instructions are easiest way to get started. The work to create a Google Container Engine cluster and launch the necessary Kubernetes resources is captured in the `cluster_up.sh` script.
+These quick deploy instructions are easiest way to get started. The work to create a Google Kubernetes Engine cluster and launch the necessary Kubernetes resources is captured in the `cluster_up.sh` script.
 
 To quick deploy the image builder application:
 
@@ -254,7 +255,7 @@ In this section you will configure Jenkins to backup your job configurations and
     ![](img/jenkins-latest-backup.png)
 
 ## Practice Restoring a Backup
-Now that you have a Jenkins backup, you can use Kubernetes and Google Container Engine to practice restoring the backup. Here's an overview of the process, with code you can execute to complete it.
+Now that you have a Jenkins backup, you can use Kubernetes and Google Kubernetes Engine to practice restoring the backup. Here's an overview of the process, with code you can execute to complete it.
 
 1. Create a new Replication Controller file for the leader and open it in your favorite text editor:
 
