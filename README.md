@@ -94,7 +94,7 @@ You can find open the `cluster_up.sh` script and execute the commands from each 
 1. Access the URL output when you created your deployment. Click the login button and use the username and password
    that was output by the `cluster_up.sh` script:
 
-1. After a successful login you should see the Jenkins admin landing page with a default backup job:
+1. After a successful login you should see the Jenkins admin landing page:
 
     ![](img/jenkins.png)
 
@@ -123,11 +123,17 @@ In the following sections you will clone an existing repo (from the previous [Sc
     $ cd scalable-resilient-web-app
     ```
 
-1. In the [Google Developer Console](https://console.developers.google.com/), navigate to **Source Code > Browse**, click "Get started" then choose "Push code from a local Git repository to your Cloud Repository", and follow all of the instructions to push the `scalable-resilient-web-app` to your Cloud Repository.
+1. Create a Cloud Source Repository and push your code to it:
 
-1. Click the **Browse** menu item again and confirm your files are there
+    ```shell
+    $ gcloud source repos create scalable-resilient-web-app
+    $ git config --global credential.https://source.developers.google.com.helper gcloud.sh
+    $ export PROJECT=$(gcloud config get-value project)
+    $ git remote add google https://source.developers.google.com/p/${PROJECT}/r/scalable-resilient-web-app
+    $ git push --all google
+    ```
 
-1. After you've pushed your files to the Cloud Repository, find and copy its Fetch URL for use in the next section:
+1. After you've pushed your files to the Cloud Source Repository, find and copy its Fetch URL for use in the next section:
 
     ```shell
     $ git remote -v show -n google | grep Fetch
@@ -141,7 +147,7 @@ In the following sections you will clone an existing repo (from the previous [Sc
 1. Access Jenkins in your browser. If you don't remember the URL, you can run the following command in the terminal where you created the deployment to find it:
 
     ```shell
-    $ echo http://$(kubectl get ingress jenkins --namespace jenkins -o "jsonpath={.status.loadBalancer.ingress[0].ip}")
+    $ echo http://$(kubectl get service cd-jenkins -o "jsonpath={.status.loadBalancer.ingress[0].ip}")
     ```
 
 1. From the Jenkins main page, choose **New Item*, name the item `redmine-immutable-image`, choose **Freestyle project**, then click **OK**. It is important the name does not include spaces:
@@ -174,10 +180,10 @@ In the following sections you will clone an existing repo (from the previous [Sc
     PROJECT_ID=$(curl -s 'http://metadata/computeMetadata/v1/project/project-id' -H 'Metadata-Flavor: Google')
 
     # Install packer
-    curl -L https://releases.hashicorp.com/packer/0.8.6/packer_0.8.6_linux_amd64.zip -o /tmp/packer.zip; unzip /tmp/packer.zip -d /usr/local/bin
+    curl -L https://releases.hashicorp.com/packer/1.3.2/packer_1.3.2_linux_amd64.zip -o /tmp/packer.zip; unzip /tmp/packer.zip
 
     # Do packer build
-    packer build \
+    ./packer build \
       -var "project_id=${PROJECT_ID}" \
       -var "git_commit=${GIT_COMMIT:0:7}" \
       -var "git_branch=${GIT_BRANCH#*/}" \
@@ -187,13 +193,7 @@ In the following sections you will clone an existing repo (from the previous [Sc
     IMAGE_TAG=gcr.io/${PROJECT_ID}/redmine:${GIT_BRANCH#*/}-${GIT_COMMIT:0:7}
 
     # Build image
-    docker build -t $IMAGE_TAG .
-
-    # Push image
-    gcloud docker push $IMAGE_TAG
-
-    # Remove local image
-    docker rmi $IMAGE_TAG
+    gcloud build submit -t $IMAGE_TAG .
     ```
 
 1. Click Save to save your job:

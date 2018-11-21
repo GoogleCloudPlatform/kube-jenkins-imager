@@ -18,8 +18,8 @@ function error_exit
 
 # Check for cluster name as first (and only) arg
 CLUSTER_NAME=${1-imager}
-NUM_NODES=3
-MACHINE_TYPE=n1-standard-1
+NUM_NODES=2
+MACHINE_TYPE=n1-standard-2
 NETWORK=default
 ZONE=us-central1-f
 
@@ -39,45 +39,39 @@ else
   echo "* Google Container Engine cluster \"${CLUSTER_NAME}\" already exists..."
 fi
 
-# Make kubectl use new cluster
-echo "* Configuring kubectl to use ${CLUSTER_NAME} cluster..."
-gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${ZONE}
-echo "done."
-
 echo "Getting Jenkins artifacts"
 if [ ! -d continuous-deployment-on-kubernetes ]; then
   git clone https://github.com/GoogleCloudPlatform/continuous-deployment-on-kubernetes
 fi
 
-echo "Deploying Jenkins to Google Container Engine..."
 pushd continuous-deployment-on-kubernetes
 
-if ! gcloud compute images describe jenkins-home-image > /dev/null 2>&1; then
-  echo "* Creating Jenkins home image"
-  gcloud compute images create jenkins-home-image --source-uri https://storage.googleapis.com/solutions-public-assets/jenkins-cd/jenkins-home-v2.tar.gz
-else
-  echo "* Jenkins home image already exists"
-fi
+echo "Installing Helm..."
+HELM_VERSION=2.9.1
+wget https://storage.googleapis.com/kubernetes-helm/helm-v$HELM_VERSION-linux-amd64.tar.gz
+tar zxfv helm-v$HELM_VERSION-linux-amd64.tar.gz
+cp linux-amd64/helm .
 
-if ! gcloud compute disks describe jenkins-home --zone ${ZONE} > /dev/null 2>&1; then
-  echo "* Creating Jenkins home disk"
-  gcloud compute disks create jenkins-home --image jenkins-home-image --zone ${ZONE}
-else
-  echo "* Jenkins home disk already exists"
-fi
+kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
 
-PASSWORD=`openssl rand -base64 15`; echo "Your Jenkins password is $PASSWORD"; sed -i.bak s#CHANGE_ME#$PASSWORD# jenkins/k8s/options
-kubectl create ns jenkins
-kubectl create secret generic jenkins --from-file=jenkins/k8s/options --namespace=jenkins
-kubectl apply -f jenkins/k8s/
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /tmp/tls.key -out /tmp/tls.crt -subj "/CN=jenkins/O=jenkins"
-kubectl create secret generic tls --from-file=/tmp/tls.crt --from-file=/tmp/tls.key --namespace jenkins
-kubectl apply -f jenkins/k8s/lb/ingress.yaml
+kubectl create serviceaccount tiller --namespace kube-system
+kubectl create clusterrolebinding tiller-admin-binding --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+
+./helm init --service-account=tiller
+./helm update
+
+# Give tiller a chance to start up
+until ./helm version; do sleep 10;done
+PASSWORD=`openssl rand -base64 15`
+echo "Deploying Jenkins..."
+./helm install -n cd stable/jenkins -f jenkins/values.yaml --version 0.16.6 --wait \
+               --set Master.AdminPassword=${PASSWORD} --set Master.ServiceType=LoadBalancer \
+               --set Master.ServicePort=80
 popd
 echo "done."
 
 echo "All resources deployed."
-echo "In a few minutes your loadBalancer will finish provisioning. You can run the following to get its IP address:"
-echo "   kubectl get ingress jenkins --namespace jenkins -o \"jsonpath={.status.loadBalancer.ingress[0].ip}\";echo"
+echo "In a few minutes your load balancer will finish provisioning. You can run the following to get its IP address:"
+echo "   kubectl get service cd-jenkins -o \"jsonpath={.status.loadBalancer.ingress[0].ip}\";echo"
 echo
-echo "Login with user: jenkins and password ${PASSWORD}"
+echo "Login with user: admin and password: ${PASSWORD}"
