@@ -153,6 +153,8 @@ In the following sections you will clone an existing repo (from the previous [Sc
 
 1. From the Jenkins main page, choose **New Item*, name the item `redmine-immutable-image`, choose **Pipeline**, then click **OK**. It is important the name does not include spaces.
 
+    ![](img/jenkins-trigger.png)
+
 1. Under **Build Triggers**, choose Poll SCM and enter a value for Schedule. In this example, `H/5 * * * *` will poll the repository every 5 minutes. Choose a value that you consider appropriate:
 
     ![](img/jenkins-trigger.png)
@@ -163,9 +165,7 @@ In the following sections you will clone an existing repo (from the previous [Sc
 
     ![](img/jenkins-scm.png)
 
-1. Click Save to save your job:
-
-    ![](img/jenkins-save.png)
+1. Click Save to save your job.
 
 #### Run the Build
 1. After saving the project, choose the **Build Now** menu item, then click the job number when it appears:
@@ -176,7 +176,7 @@ In the following sections you will clone an existing repo (from the previous [Sc
 
     ![](img/jenkins-console-output.png)
 
-  Packer parallelizes the GCE and Docker builds. You can expect the build to take about 20 minutes; the sample build is updating the OS, building and installing Ruby, and installing the Redmine project management application and all of its gem dependencies.
+  Jenkins parallelizes the GCE and Docker builds. You can expect the build to take about 20 minutes; the sample build is updating the OS, building and installing Ruby, and installing the Redmine project management application and all of its gem dependencies.
 
 1. The build is done when you see a `Finished: SUCCESS` line in the output. A few lines before that you should see the outputs (GCE and Docker iamges) of the build:
 
