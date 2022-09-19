@@ -1,3 +1,5 @@
+This project is no longer actively developed or maintained.
+
 # Automated Image Builder with Jenkins, Packer, and Kubernetes
 In this tutorial you will deploy a fully-functional implementation of the automated image building pipeline described in the [Automated Image Builds with Jenkins, Packer, and Kubernetes solution paper](https://cloud.google.com/solutions/automated-build-images-with-jenkins-kubernetes).
 
